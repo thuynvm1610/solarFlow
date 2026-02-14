@@ -40,21 +40,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "GROUP BY MONTH(b.checkInDate) ORDER BY MONTH(b.checkInDate)")
     List<MonthlyRevenueDTO> getMonthlyRevenue(@Param("year") int year);
 
-    // ✅ QUERY MỚI: Lấy room number từ BookingRoom
     @Query("SELECT new com.hotel.hotelbookingbackend.dto.RecentBookingDTO(b.id, b.bookingCode, u.fullName, " +
             "(SELECT r.roomNumber FROM BookingRoom br JOIN br.room r WHERE br.booking.id = b.id ORDER BY br.id ASC LIMIT 1), " +
             "b.checkInDate, b.checkOutDate, b.totalPrice, CAST(b.status AS string)) " +
             "FROM Booking b JOIN b.user u ORDER BY b.createdAt DESC")
     List<RecentBookingDTO> getRecentBookings(Pageable pageable);
 
-    // ✅ XÓA query này vì không còn b.room
-    // @Query("SELECT b FROM Booking b WHERE b.room.id = :roomId ...")
-    // List<Booking> findConflictingBookings(...);
-
     @Query("SELECT b FROM Booking b WHERE b.user.id = :userId ORDER BY b.createdAt DESC")
     List<Booking> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 
-    // ✅ THÊM query mới để check conflict qua BookingRoom
     @Query("SELECT b FROM Booking b " +
             "JOIN b.bookingRooms br " +
             "WHERE br.room.id = :roomId " +
