@@ -16,19 +16,19 @@ import './Sidebar.css';
 const Sidebar = ({ isOpen }) => {
   const menuItems = [
     { path: '/admin/dashboard', icon: <FaTachometerAlt />, label: 'Dashboard' },
-    { path: '/admin/bookings', icon: <FaCalendarCheck />, label: 'Bookings' },
-    { path: '/admin/hotels', icon: <FaHotel />, label: 'Hotels' },
-    { path: '/admin/rooms', icon: <FaBed />, label: 'Rooms' },
-    { path: '/admin/users', icon: <FaUsers />, label: 'Users' },
-    { path: '/admin/reviews', icon: <FaStar />, label: 'Reviews' },
-    { path: '/admin/reports', icon: <FaChartBar />, label: 'Reports' },
-    { path: '/admin/settings', icon: <FaCog />, label: 'Settings' },
+    { path: '/admin/bookings', icon: <FaCalendarCheck />, label: 'Đơn đặt phòng' },
+    { path: '/admin/hotels', icon: <FaHotel />, label: 'Khách sạn' },
+    { path: '/admin/rooms', icon: <FaBed />, label: 'Phòng' },
+    { path: '/admin/users', icon: <FaUsers />, label: 'Người dùng' },
+    { path: '/admin/reviews', icon: <FaStar />, label: 'Đánh giá' },
+    { path: '/admin/reports', icon: <FaChartBar />, label: 'Báo cáo' },
+    { path: '/admin/settings', icon: <FaCog />, label: 'Cài đặt' },
   ];
 
   return (
     <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <div className="sidebar-header">
-        <h2>{isOpen ? 'Hotel Admin' : 'HA'}</h2>
+        <h2>{isOpen ? 'SolarFlow' : 'SF'}</h2>
       </div>
       
       <nav className="sidebar-nav">

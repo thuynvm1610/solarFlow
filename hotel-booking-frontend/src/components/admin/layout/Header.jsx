@@ -21,7 +21,7 @@ const Header = ({ toggleSidebar }) => {
           <FaUserCircle className="user-avatar" />
           <div className="user-info">
             <span className="user-name">Admin User</span>
-            <span className="user-role">Administrator</span>
+            <span className="user-role">Quản trị viên</span>
           </div>
         </div>
       </div>
