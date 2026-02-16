@@ -1,8 +1,6 @@
 package com.hotel.hotelbookingbackend.service;
 
-import com.hotel.hotelbookingbackend.dto.DashboardStatsDTO;
-import com.hotel.hotelbookingbackend.dto.MonthlyRevenueDTO;
-import com.hotel.hotelbookingbackend.dto.RecentBookingDTO;
+import com.hotel.hotelbookingbackend.dto.*;
 
 import java.util.List;
 
@@ -13,4 +11,14 @@ public interface DashboardService {
     List<MonthlyRevenueDTO> getMonthlyRevenue(int year);
 
     List<RecentBookingDTO> getRecentBookings(int limit);
+
+    List<HotelStatsByCityDTO> getHotelStatsByCity();
+
+    List<HotelStatsByStarDTO> getHotelStatsByStar();
+
+    List<TopHotelByBookingsDTO> getTopHotelsByBookings(int limit);
+
+    List<TopHotelByRatingDTO> getTopHotelsByRating(int limit);
+
+    List<YearlyRevenueDTO> getYearlyRevenue(int limit);
 }

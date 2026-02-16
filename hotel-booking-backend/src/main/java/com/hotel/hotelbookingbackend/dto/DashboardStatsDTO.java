@@ -18,4 +18,5 @@ public class DashboardStatsDTO {
     private Long totalUsers;
     private Double averageRating;
     private Double occupancyRate;
+    private Long totalHotels;
 }

@@ -48,6 +48,9 @@ public class User {
     @Column(length = 20)
     private Role role;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private UserStatus status;

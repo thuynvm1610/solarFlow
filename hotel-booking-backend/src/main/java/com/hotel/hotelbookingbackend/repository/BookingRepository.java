@@ -3,6 +3,8 @@ package com.hotel.hotelbookingbackend.repository;
 import com.hotel.hotelbookingbackend.entity.Booking;
 import com.hotel.hotelbookingbackend.dto.MonthlyRevenueDTO;
 import com.hotel.hotelbookingbackend.dto.RecentBookingDTO;
+import com.hotel.hotelbookingbackend.dto.TopHotelByBookingsDTO;
+import com.hotel.hotelbookingbackend.dto.YearlyRevenueDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -46,9 +48,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "FROM Booking b JOIN b.user u ORDER BY b.createdAt DESC")
     List<RecentBookingDTO> getRecentBookings(Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.user.id = :userId ORDER BY b.createdAt DESC")
-    List<Booking> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
-
     @Query("SELECT b FROM Booking b " +
             "JOIN b.bookingRooms br " +
             "WHERE br.room.id = :roomId " +
@@ -61,4 +60,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("checkIn") LocalDate checkIn,
             @Param("checkOut") LocalDate checkOut
     );
+
+    @Query("SELECT b FROM Booking b WHERE b.user.id = :userId ORDER BY b.createdAt DESC")
+    List<Booking> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
+
+    @Query("SELECT new com.hotel.hotelbookingbackend.dto.TopHotelByBookingsDTO(h.id, h.name, COUNT(b)) " +
+            "FROM Booking b JOIN b.hotel h " +
+            "WHERE b.status != 'CANCELLED' " +
+            "GROUP BY h.id, h.name " +
+            "ORDER BY COUNT(b) DESC")
+    List<TopHotelByBookingsDTO> getTopHotelsByBookings(Pageable pageable);
+
+    @Query("SELECT new com.hotel.hotelbookingbackend.dto.YearlyRevenueDTO(YEAR(b.checkInDate), SUM(b.totalPrice)) " +
+            "FROM Booking b WHERE b.status != 'CANCELLED' " +
+            "GROUP BY YEAR(b.checkInDate) ORDER BY YEAR(b.checkInDate) DESC")
+    List<YearlyRevenueDTO> getYearlyRevenue(Pageable pageable);
 }

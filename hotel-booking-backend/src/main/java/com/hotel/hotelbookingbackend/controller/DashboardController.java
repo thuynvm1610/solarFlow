@@ -1,9 +1,7 @@
 package com.hotel.hotelbookingbackend.controller;
 
-import com.hotel.hotelbookingbackend.dto.DashboardStatsDTO;
-import com.hotel.hotelbookingbackend.dto.MonthlyRevenueDTO;
-import com.hotel.hotelbookingbackend.dto.RecentBookingDTO;
-import com.hotel.hotelbookingbackend.service.*;
+import com.hotel.hotelbookingbackend.dto.*;
+import com.hotel.hotelbookingbackend.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,5 +30,33 @@ public class DashboardController {
     public ResponseEntity<List<RecentBookingDTO>> getRecentBookings(
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(dashboardService.getRecentBookings(limit));
+    }
+
+    @GetMapping("/hotels/by-city")
+    public ResponseEntity<List<HotelStatsByCityDTO>> getHotelStatsByCity() {
+        return ResponseEntity.ok(dashboardService.getHotelStatsByCity());
+    }
+
+    @GetMapping("/hotels/by-star")
+    public ResponseEntity<List<HotelStatsByStarDTO>> getHotelStatsByStar() {
+        return ResponseEntity.ok(dashboardService.getHotelStatsByStar());
+    }
+
+    @GetMapping("/hotels/top-bookings")
+    public ResponseEntity<List<TopHotelByBookingsDTO>> getTopHotelsByBookings(
+            @RequestParam(defaultValue = "3") int limit) {
+        return ResponseEntity.ok(dashboardService.getTopHotelsByBookings(limit));
+    }
+
+    @GetMapping("/hotels/top-ratings")
+    public ResponseEntity<List<TopHotelByRatingDTO>> getTopHotelsByRating(
+            @RequestParam(defaultValue = "3") int limit) {
+        return ResponseEntity.ok(dashboardService.getTopHotelsByRating(limit));
+    }
+
+    @GetMapping("/revenue/yearly")
+    public ResponseEntity<List<YearlyRevenueDTO>> getYearlyRevenue(
+            @RequestParam(defaultValue = "3") int limit) {
+        return ResponseEntity.ok(dashboardService.getYearlyRevenue(limit));
     }
 }
