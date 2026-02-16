@@ -62,11 +62,6 @@ public class Booking {
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
     private List<BookingRoom> bookingRooms;
 
-    // ✅ XÓA QUAN HỆ TRỰC TIẾP VỚI ROOM
-    // @ManyToOne
-    // @JoinColumn(name = "room_id")
-    // private Room room;
-
     public enum BookingStatus {
         PENDING, CONFIRMED, CHECKED_IN, CHECKED_OUT, CANCELLED, EXPIRED
     }

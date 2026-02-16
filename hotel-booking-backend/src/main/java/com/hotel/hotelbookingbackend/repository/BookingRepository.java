@@ -1,10 +1,10 @@
 package com.hotel.hotelbookingbackend.repository;
 
-import com.hotel.hotelbookingbackend.entity.Booking;
 import com.hotel.hotelbookingbackend.dto.MonthlyRevenueDTO;
 import com.hotel.hotelbookingbackend.dto.RecentBookingDTO;
 import com.hotel.hotelbookingbackend.dto.TopHotelByBookingsDTO;
 import com.hotel.hotelbookingbackend.dto.YearlyRevenueDTO;
+import com.hotel.hotelbookingbackend.entity.Booking;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,10 +31,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.status = :status")
     Long countByStatus(@Param("status") Booking.BookingStatus status);
 
-    @Query("SELECT SUM(b.totalPrice) FROM Booking b WHERE b.createdAt BETWEEN :start AND :end AND b.status != 'CANCELLED'")
+    @Query("""
+       SELECT SUM(b.totalPrice)
+       FROM Booking b
+       WHERE b.createdAt BETWEEN :start AND :end
+         AND b.status IN :statuses
+       """)
     BigDecimal sumRevenueByDateRange(
             @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end
+            @Param("end") LocalDateTime end,
+            @Param("statuses") List<Booking.BookingStatus> statuses
     );
 
     @Query("SELECT new com.hotel.hotelbookingbackend.dto.MonthlyRevenueDTO(MONTH(b.checkInDate), SUM(b.totalPrice)) " +

@@ -51,7 +51,15 @@ public class DashboardServiceImpl implements DashboardService {
                     .withSecond(0)
                     .withNano(0);
 
-            BigDecimal revenue = bookingRepository.sumRevenueByDateRange(startOfMonth, LocalDateTime.now());
+            BigDecimal revenue = bookingRepository.sumRevenueByDateRange(
+                    startOfMonth,
+                    LocalDateTime.now(),
+                    List.of(
+                            Booking.BookingStatus.CONFIRMED,
+                            Booking.BookingStatus.CHECKED_IN,
+                            Booking.BookingStatus.CHECKED_OUT
+                    )
+            );
             stats.setMonthlyRevenue(revenue != null ? revenue : BigDecimal.ZERO);
 
             // Rooms
@@ -75,7 +83,6 @@ public class DashboardServiceImpl implements DashboardService {
                 stats.setOccupancyRate(0.0);
             }
 
-            // ✅ Total hotels
             stats.setTotalHotels(hotelRepository.count());
 
             return stats;
