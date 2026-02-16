@@ -11,7 +11,6 @@ import {
   FaChartBar,
   FaSignOutAlt,
 } from 'react-icons/fa';
-import './Sidebar.css';
 
 const Sidebar = ({ isOpen }) => {
   const menuItems = [
@@ -26,26 +25,44 @@ const Sidebar = ({ isOpen }) => {
   ];
 
   return (
-    <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
-      <div className="sidebar-header">
-        <h2>{isOpen ? 'SolarFlow' : 'SF'}</h2>
+    <div 
+      className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-[#1e3c72] to-[#2a5298] text-white transition-all duration-300 ease-in-out z-[1000] flex flex-col
+        ${isOpen ? 'w-64' : 'w-20'}
+        max-lg:${isOpen ? 'w-full' : 'w-20'}`}
+    >
+      {/* Header */}
+      <div className="p-5 text-center border-b border-white border-opacity-10">
+        <h2 className="m-0 text-2xl font-bold">
+          {isOpen ? 'SolarFlow' : 'SF'}
+        </h2>
       </div>
       
-      <nav className="sidebar-nav">
+      {/* Navigation */}
+      <nav className="flex-1 py-5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-white/10">
         {menuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+            className={({ isActive }) =>
+              `flex items-center px-5 py-4 text-white/80 no-underline transition-all duration-300 gap-4 hover:bg-white/10 hover:text-white
+              ${isActive ? 'bg-white/15 text-white border-l-4 border-green-500' : ''}`
+            }
           >
-            <span className="sidebar-icon">{item.icon}</span>
-            {isOpen && <span className="sidebar-label">{item.label}</span>}
+            <span className="text-xl min-w-[24px] flex items-center justify-center">
+              {item.icon}
+            </span>
+            {isOpen && (
+              <span className="whitespace-nowrap text-[15px] font-medium">
+                {item.label}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
 
-      <div className="sidebar-footer">
-        <button className="logout-btn">
+      {/* Footer - Logout */}
+      <div className="p-5 border-t border-white border-opacity-10">
+        <button className="w-full px-3 py-3 bg-white/10 border-none text-white rounded-md cursor-pointer flex items-center justify-center gap-2.5 text-[15px] hover:bg-white/20 transition-colors">
           <FaSignOutAlt />
           {isOpen && <span>Logout</span>}
         </button>
