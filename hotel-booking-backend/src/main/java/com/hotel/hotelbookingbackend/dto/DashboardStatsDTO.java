@@ -12,11 +12,12 @@ import java.math.BigDecimal;
 public class DashboardStatsDTO {
     private Long totalBookings;
     private Long activeBookings;
-    private BigDecimal monthlyRevenue;
     private Long totalRooms;
-    private Long availableRooms;
-    private Long totalUsers;
-    private Double averageRating;
-    private Double occupancyRate;
+    private Long availableRooms;  // Phòng trống (có thể thuê)
+    private Long maintenanceRooms;  // Phòng đang bảo trì (không thể thuê)
+    private Long occupiedRooms; // Phòng đang được thuê
     private Long totalHotels;
+    private Long activeHotels;
+    private Long totalUsers;
+    private BigDecimal monthlyRevenue;
 }

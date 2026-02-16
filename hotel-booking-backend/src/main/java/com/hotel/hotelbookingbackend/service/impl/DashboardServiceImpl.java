@@ -39,7 +39,7 @@ public class DashboardServiceImpl implements DashboardService {
             // Total bookings
             stats.setTotalBookings(bookingRepository.count());
 
-            // Active bookings
+            // Active bookings (checked in)
             Long activeBookings = bookingRepository.countByStatus(Booking.BookingStatus.CHECKED_IN);
             stats.setActiveBookings(activeBookings != null ? activeBookings : 0L);
 
@@ -62,28 +62,30 @@ public class DashboardServiceImpl implements DashboardService {
             );
             stats.setMonthlyRevenue(revenue != null ? revenue : BigDecimal.ZERO);
 
-            // Rooms
+            // Total rooms
             stats.setTotalRooms(roomRepository.count());
 
+            // ✅ Available rooms - Phòng trống (có thể thuê)
             Long availableRooms = roomRepository.countByStatus("AVAILABLE");
             stats.setAvailableRooms(availableRooms != null ? availableRooms : 0L);
 
-            // Users
+            // ✅ Occupied rooms - Phòng đang được thuê
+            Long occupiedRooms = roomRepository.countByStatus("OCCUPIED");
+            stats.setOccupiedRooms(occupiedRooms != null ? occupiedRooms : 0L);
+
+            // ✅ Maintenance rooms - Phòng đang bảo trì (không thể thuê)
+            Long maintenanceRooms = roomRepository.countByStatus("MAINTENANCE");
+            stats.setMaintenanceRooms(maintenanceRooms != null ? maintenanceRooms : 0L);
+
+            // Total users
             stats.setTotalUsers(userRepository.count());
 
-            // Rating
-            Double avgRating = reviewRepository.getAverageRating();
-            stats.setAverageRating(avgRating != null ? avgRating : 0.0);
-
-            // Occupancy rate
-            Long occupiedRooms = roomRepository.countByStatus("OCCUPIED");
-            if (stats.getTotalRooms() > 0 && occupiedRooms != null) {
-                stats.setOccupancyRate((double) occupiedRooms / stats.getTotalRooms() * 100);
-            } else {
-                stats.setOccupancyRate(0.0);
-            }
-
+            // Total hotels
             stats.setTotalHotels(hotelRepository.count());
+
+            // ✅ Active hotels
+            List<com.hotel.hotelbookingbackend.entity.Hotel> activeHotels = hotelRepository.findByStatus("ACTIVE");
+            stats.setActiveHotels((long) activeHotels.size());
 
             return stats;
 
@@ -95,10 +97,11 @@ public class DashboardServiceImpl implements DashboardService {
             emptyStats.setMonthlyRevenue(BigDecimal.ZERO);
             emptyStats.setTotalRooms(0L);
             emptyStats.setAvailableRooms(0L);
+            emptyStats.setOccupiedRooms(0L);
+            emptyStats.setMaintenanceRooms(0L);
             emptyStats.setTotalUsers(0L);
-            emptyStats.setAverageRating(0.0);
-            emptyStats.setOccupancyRate(0.0);
             emptyStats.setTotalHotels(0L);
+            emptyStats.setActiveHotels(0L);
             return emptyStats;
         }
     }
@@ -125,7 +128,6 @@ public class DashboardServiceImpl implements DashboardService {
         }
     }
 
-    // ✅ Thêm implementations mới
     @Override
     public List<HotelStatsByCityDTO> getHotelStatsByCity() {
         try {

@@ -90,6 +90,6 @@ public class Hotel {
     private List<Review> reviews;
 
     public enum HotelType {
-        LUXURY, BOUTIQUE, RESORT, BUSINESS, BUDGET
+        HOTEL, RESORT, HOMESTAY
     }
 }
