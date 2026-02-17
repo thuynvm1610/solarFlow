@@ -50,6 +50,9 @@ public class Booking {
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
 
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

@@ -32,20 +32,22 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Long countByStatus(@Param("status") Booking.BookingStatus status);
 
     @Query("""
-       SELECT SUM(b.totalPrice)
-       FROM Booking b
-       WHERE b.createdAt BETWEEN :start AND :end
-         AND b.status IN :statuses
-       """)
+            SELECT SUM(b.totalPrice)
+            FROM Booking b
+            WHERE b.createdAt BETWEEN :start AND :end
+              AND b.status IN :statuses
+            """)
     BigDecimal sumRevenueByDateRange(
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
             @Param("statuses") List<Booking.BookingStatus> statuses
     );
 
-    @Query("SELECT new com.hotel.hotelbookingbackend.dto.MonthlyRevenueDTO(MONTH(b.checkInDate), SUM(b.totalPrice)) " +
-            "FROM Booking b WHERE YEAR(b.checkInDate) = :year AND b.status != 'CANCELLED' " +
-            "GROUP BY MONTH(b.checkInDate) ORDER BY MONTH(b.checkInDate)")
+    @Query("""
+            SELECT new com.hotel.hotelbookingbackend.dto.MonthlyRevenueDTO(MONTH(b.paidAt), SUM(b.totalPrice))
+            FROM Booking b WHERE YEAR(b.paidAt) = :year
+            GROUP BY MONTH(b.paidAt) ORDER BY MONTH(b.paidAt)
+            """)
     List<MonthlyRevenueDTO> getMonthlyRevenue(@Param("year") int year);
 
     @Query("SELECT new com.hotel.hotelbookingbackend.dto.RecentBookingDTO(b.id, b.bookingCode, u.fullName, " +
