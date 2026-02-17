@@ -79,8 +79,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "ORDER BY COUNT(b) DESC")
     List<TopHotelByBookingsDTO> getTopHotelsByBookings(Pageable pageable);
 
-    @Query("SELECT new com.hotel.hotelbookingbackend.dto.YearlyRevenueDTO(YEAR(b.checkInDate), SUM(b.totalPrice)) " +
-            "FROM Booking b WHERE b.status != 'CANCELLED' " +
-            "GROUP BY YEAR(b.checkInDate) ORDER BY YEAR(b.checkInDate) DESC")
+    @Query("""
+            SELECT new com.hotel.hotelbookingbackend.dto.YearlyRevenueDTO(YEAR(b.paidAt), SUM(b.totalPrice))
+            FROM Booking b
+            GROUP BY YEAR(b.paidAt) ORDER BY YEAR(b.paidAt) DESC
+            """)
     List<YearlyRevenueDTO> getYearlyRevenue(Pageable pageable);
 }

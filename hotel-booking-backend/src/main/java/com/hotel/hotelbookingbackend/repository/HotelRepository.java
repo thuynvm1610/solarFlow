@@ -11,21 +11,21 @@ import java.util.List;
 
 public interface HotelRepository extends JpaRepository<Hotel, Long> {
 
-    List<Hotel> findByCity(String city);
-
     Long countByStatus(Hotel.HotelStatus status);
 
-    @Query("SELECT h FROM Hotel h WHERE h.starRating >= :rating")
-    List<Hotel> findByMinimumRating(@Param("rating") Integer rating);
-
-    @Query("SELECT h FROM Hotel h WHERE h.name LIKE %:keyword% OR h.city LIKE %:keyword%")
-    List<Hotel> searchHotels(@Param("keyword") String keyword);
-
-    @Query("SELECT new com.hotel.hotelbookingbackend.dto.HotelStatsByCityDTO(h.city, COUNT(h)) " +
-            "FROM Hotel h GROUP BY h.city ORDER BY COUNT(h) DESC")
+    @Query("""
+            SELECT new com.hotel.hotelbookingbackend.dto.HotelStatsByCityDTO(h.city, COUNT(h))
+            FROM Hotel h
+            GROUP BY h.city
+            ORDER BY COUNT(h) DESC
+            """)
     List<HotelStatsByCityDTO> getHotelCountByCity();
 
-    @Query("SELECT new com.hotel.hotelbookingbackend.dto.HotelStatsByStarDTO(h.starRating, COUNT(h)) " +
-            "FROM Hotel h GROUP BY h.starRating ORDER BY h.starRating")
+    @Query("""
+            SELECT new com.hotel.hotelbookingbackend.dto.HotelStatsByStarDTO(h.starRating, COUNT(h))
+            FROM Hotel h
+            GROUP BY h.starRating
+            ORDER BY h.starRating
+            """)
     List<HotelStatsByStarDTO> getHotelCountByStar();
 }

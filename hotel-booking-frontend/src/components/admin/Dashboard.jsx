@@ -485,7 +485,7 @@ const Dashboard = () => {
           {/* City Distribution */}
           <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
             <div className="mb-5 pb-3 border-b-2 border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-800">Phân Bố Theo TP</h2>
+              <h2 className="text-lg font-semibold text-gray-800">KS Phân Bố Theo TP</h2>
             </div>
             <div className="h-72">
               <Pie data={hotelsByCityData} options={chartOptions} />
