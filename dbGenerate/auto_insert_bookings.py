@@ -57,8 +57,12 @@ EXTRA_SERVICES = {
     35: (250000, 1200000, 5),
 }
 
+# Tỉ lệ status cho các booking tính doanh thu (không gồm CANCELLED bổ sung)
 STATUSES = ['CHECKED_OUT', 'CANCELLED']
 STATUS_WEIGHTS = [0.92, 0.08]
+
+# Số lượng booking CANCELLED bổ sung mỗi tháng (ngoài doanh thu)
+EXTRA_CANCELLED_PER_MONTH_RANGE = (10, 25)
 
 # ==================== HELPER FUNCTIONS ====================
 
@@ -103,6 +107,29 @@ def random_date_in_month(year, month, end_date=None):
     day = random.randint(1, max(1, last_day - 1))
     return datetime(year, month, day)
 
+PAYMENT_EXPIRY_HOURS = 1  # expired_at = created_at + 1 giờ
+
+def generate_timestamps(created_at_dt, status):
+    """
+    Sinh expired_at và paid_at theo logic:
+      - expired_at: CHỈ có với CANCELLED = created_at + 1 giờ, các status khác là None.
+      - paid_at:
+          * CHECKED_OUT / CONFIRMED / CHECKED_IN: thanh toán ngẫu nhiên
+            trong khoảng (created_at, created_at + 1 giờ).
+          * CANCELLED / PENDING: None.
+    """
+    if status == 'CANCELLED':
+        expired_at = (created_at_dt + timedelta(hours=PAYMENT_EXPIRY_HOURS)).strftime('%Y-%m-%d %H:%M:%S')
+        return expired_at, None
+
+    if status == 'PENDING':
+        return None, None
+
+    # CHECKED_OUT / CONFIRMED / CHECKED_IN: không có expired_at, có paid_at
+    paid_offset_seconds = random.randint(60, PAYMENT_EXPIRY_HOURS * 3600 - 60)
+    paid_at = (created_at_dt + timedelta(seconds=paid_offset_seconds)).strftime('%Y-%m-%d %H:%M:%S')
+    return None, paid_at
+
 # ==================== DATABASE OPERATIONS ====================
 
 def connect_db():
@@ -132,11 +159,12 @@ def clear_existing_data(cursor):
         print(f"✗ Error clearing data: {err}")
 
 def insert_booking(cursor, booking):
-    """Insert a single booking"""
+    """Insert a single booking (bao gồm expired_at và paid_at)"""
     sql = """
     INSERT INTO bookings 
-    (booking_code, user_id, hotel_id, check_in_date, check_out_date, total_price, status, created_at)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    (booking_code, user_id, hotel_id, check_in_date, check_out_date,
+     total_price, status, expired_at, paid_at, created_at)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     values = (
         booking['booking_code'],
@@ -146,6 +174,8 @@ def insert_booking(cursor, booking):
         booking['check_out_date'],
         booking['total_price'],
         booking['status'],
+        booking.get('expired_at'),  # created_at + 1 giờ
+        booking.get('paid_at'),     # None → NULL nếu CANCELLED/PENDING
         booking['created_at']
     )
     cursor.execute(sql, values)
@@ -201,6 +231,7 @@ def generate_and_insert_bookings(conn):
     total_booking_rooms = 0
     total_services = 0
     total_revenue = 0
+    total_cancelled_extra = 0
     
     print("\n" + "=" * 60)
     print("GENERATING AND INSERTING BOOKING DATA")
@@ -216,6 +247,7 @@ def generate_and_insert_bookings(conn):
             monthly_revenue = 0
             month_bookings = 0
             
+            # ── PHASE 1: Sinh booking đến khi đủ doanh thu tháng ──────────────
             while monthly_revenue < TARGET_MONTHLY_REVENUE:
                 # Generate booking data
                 user_id = random.choice(CUSTOMER_IDS)
@@ -249,7 +281,10 @@ def generate_and_insert_bookings(conn):
                 status = random.choices(STATUSES, weights=STATUS_WEIGHTS)[0]
                 booking_code = f'BK{year}{month:02d}{total_bookings + 1:06d}'
                 created_at = check_in - timedelta(days=random.randint(1, 30))
-                
+
+                # Sinh expired_at và paid_at
+                expired_at, paid_at = generate_timestamps(created_at, status)
+
                 # Insert booking
                 booking_id = insert_booking(cursor, {
                     'booking_code': booking_code,
@@ -259,6 +294,8 @@ def generate_and_insert_bookings(conn):
                     'check_out_date': check_out.strftime('%Y-%m-%d'),
                     'total_price': booking_total,
                     'status': status,
+                    'expired_at': expired_at,
+                    'paid_at': paid_at,
                     'created_at': created_at.strftime('%Y-%m-%d %H:%M:%S')
                 })
                 
@@ -274,8 +311,8 @@ def generate_and_insert_bookings(conn):
                     
                     total_booking_rooms += 1
                     
-                    # Add extra services (30% chance)
-                    if random.random() < 0.3:
+                    # Add extra services (30% chance) — chỉ với booking không CANCELLED
+                    if status != 'CANCELLED' and random.random() < 0.3:
                         num_services = random.randint(1, 3)
                         selected_services = random.sample(list(EXTRA_SERVICES.keys()), 
                                                          min(num_services, len(EXTRA_SERVICES)))
@@ -319,11 +356,66 @@ def generate_and_insert_bookings(conn):
                 # Commit every 50 bookings for performance
                 if month_bookings % 50 == 0:
                     conn.commit()
-            
+
+            # ── PHASE 2: Sinh thêm một số booking CANCELLED (không tính doanh thu) ──
+            extra_cancelled = random.randint(*EXTRA_CANCELLED_PER_MONTH_RANGE)
+            for _ in range(extra_cancelled):
+                user_id = random.choice(CUSTOMER_IDS)
+                hotel_id = random.choice(HOTEL_IDS)
+
+                check_in = random_date_in_month(year, month, END_DATE)
+                nights = random.randint(1, 7)
+                check_out = check_in + timedelta(days=nights)
+
+                if check_out > END_DATE:
+                    check_out = END_DATE
+                    nights = max(1, (check_out - check_in).days)
+                    check_out = check_in + timedelta(days=nights)
+                    if check_out > END_DATE:
+                        continue
+
+                num_rooms = random.choices([1, 2, 3], weights=[0.6, 0.3, 0.1])[0]
+                available_rooms = HOTEL_ROOMS[hotel_id]
+                selected_rooms = random.sample(available_rooms, min(num_rooms, len(available_rooms)))
+
+                booking_total = sum(
+                    get_room_price(hotel_id, r) * nights for r in selected_rooms
+                )
+
+                booking_code = f'BK{year}{month:02d}{total_bookings + 1:06d}'
+                created_at = check_in - timedelta(days=random.randint(1, 30))
+                expired_at_cancelled, _ = generate_timestamps(created_at, 'CANCELLED')
+
+                booking_id = insert_booking(cursor, {
+                    'booking_code': booking_code,
+                    'user_id': user_id,
+                    'hotel_id': hotel_id,
+                    'check_in_date': check_in.strftime('%Y-%m-%d'),
+                    'check_out_date': check_out.strftime('%Y-%m-%d'),
+                    'total_price': booking_total,
+                    'status': 'CANCELLED',
+                    'expired_at': expired_at_cancelled,  # created_at + 1 giờ
+                    'paid_at': None,                     # CANCELLED → không có paid_at
+                    'created_at': created_at.strftime('%Y-%m-%d %H:%M:%S')
+                })
+
+                for room_id in selected_rooms:
+                    insert_booking_room(cursor, {
+                        'booking_id': booking_id,
+                        'room_id': room_id,
+                        'price_per_night': get_room_price(hotel_id, room_id)
+                    })
+                    total_booking_rooms += 1
+
+                total_bookings += 1
+                month_bookings += 1
+                total_cancelled_extra += 1
+
             # Commit remaining bookings for this month
             conn.commit()
             
-            print(f"  → {month_bookings} bookings | Revenue: {monthly_revenue:,.0f} VND")
+            print(f"  → {month_bookings} bookings (bao gồm {extra_cancelled} CANCELLED bổ sung) "
+                  f"| Revenue: {monthly_revenue:,.0f} VND")
             
             # Move to next month
             if month == 12:
@@ -334,11 +426,12 @@ def generate_and_insert_bookings(conn):
         print("\n" + "=" * 60)
         print("SUMMARY")
         print("=" * 60)
-        print(f"✓ Total bookings inserted: {total_bookings:,}")
-        print(f"✓ Total booking rooms inserted: {total_booking_rooms:,}")
-        print(f"✓ Total services inserted: {total_services:,}")
-        print(f"✓ Total revenue: {total_revenue:,.0f} VND")
-        print(f"✓ Average per booking: {total_revenue/total_bookings:,.0f} VND")
+        print(f"✓ Total bookings inserted:       {total_bookings:,}")
+        print(f"✓ Total booking rooms inserted:  {total_booking_rooms:,}")
+        print(f"✓ Total services inserted:       {total_services:,}")
+        print(f"✓ Extra CANCELLED bookings:      {total_cancelled_extra:,}")
+        print(f"✓ Total revenue:                 {total_revenue:,.0f} VND")
+        print(f"✓ Average per booking:           {total_revenue/total_bookings:,.0f} VND")
         print("=" * 60)
         print("\n✓ All data inserted successfully!")
         
