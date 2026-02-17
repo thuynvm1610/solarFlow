@@ -74,7 +74,7 @@ public class User {
     }
 
     public enum Role {
-        ADMIN, USER, MANAGER
+        ADMIN, CUSTOMER, MANAGER
     }
 
     public enum UserStatus {

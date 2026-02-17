@@ -4,11 +4,13 @@ import com.hotel.hotelbookingbackend.dto.*;
 import com.hotel.hotelbookingbackend.entity.Booking;
 import com.hotel.hotelbookingbackend.entity.Hotel;
 import com.hotel.hotelbookingbackend.entity.Room;
+import com.hotel.hotelbookingbackend.entity.User;
 import com.hotel.hotelbookingbackend.repository.*;
 import com.hotel.hotelbookingbackend.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
