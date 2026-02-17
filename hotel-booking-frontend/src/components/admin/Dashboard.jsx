@@ -232,23 +232,23 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 lg:mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Trang Tổng Quan</h1>
-          <p className="text-gray-600">Chào mừng trở lại! Đây là những gì đang diễn ra trong hệ thống khách sạn của bạn hôm nay.</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-2">Trang Tổng Quan</h1>
+          <p className="text-sm lg:text-base text-gray-600">Chào mừng trở lại! Đây là những gì đang diễn ra trong hệ thống khách sạn của bạn hôm nay.</p>
         </div>
-        <div className="flex gap-5">
-          <div className="flex items-center gap-3 px-5 py-3 bg-white rounded-xl shadow-card">
-            <FaHotel className="text-2xl text-blue-500" />
+        <div className="flex gap-3 lg:gap-5 w-full lg:w-auto">
+          <div className="flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 lg:py-3 bg-white rounded-xl shadow-card flex-1 lg:flex-initial">
+            <FaHotel className="text-xl lg:text-2xl text-blue-500" />
             <div>
-              <span className="block text-xl font-bold text-gray-800">{stats?.totalHotels || 0}</span>
+              <span className="block text-lg lg:text-xl font-bold text-gray-800">{stats?.totalHotels || 0}</span>
               <span className="block text-xs text-gray-500">Khách Sạn</span>
             </div>
           </div>
-          <div className="flex items-center gap-3 px-5 py-3 bg-white rounded-xl shadow-card">
-            <FaUsers className="text-2xl text-blue-500" />
+          <div className="flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 lg:py-3 bg-white rounded-xl shadow-card flex-1 lg:flex-initial">
+            <FaUsers className="text-xl lg:text-2xl text-blue-500" />
             <div>
-              <span className="block text-xl font-bold text-gray-800">{stats?.totalUsers || 0}</span>
+              <span className="block text-lg lg:text-xl font-bold text-gray-800">{stats?.totalUsers || 0}</span>
               <span className="block text-xs text-gray-500">Người Dùng</span>
             </div>
           </div>

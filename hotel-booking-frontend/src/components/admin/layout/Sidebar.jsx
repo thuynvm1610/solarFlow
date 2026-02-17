@@ -10,9 +10,10 @@ import {
   FaCog,
   FaChartBar,
   FaSignOutAlt,
+  FaTimes,
 } from 'react-icons/fa';
 
-const Sidebar = ({ isOpen }) => {
+const Sidebar = ({ isOpen, toggleSidebar }) => {
   const menuItems = [
     { path: '/admin/dashboard', icon: <FaTachometerAlt />, label: 'Dashboard' },
     { path: '/admin/bookings', icon: <FaCalendarCheck />, label: 'Đơn đặt phòng' },
@@ -27,14 +28,25 @@ const Sidebar = ({ isOpen }) => {
   return (
     <div 
       className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-[#1e3c72] to-[#2a5298] text-white transition-all duration-300 ease-in-out z-[1000] flex flex-col
-        ${isOpen ? 'w-64' : 'w-20'}
-        max-lg:${isOpen ? 'w-full' : 'w-20'}`}
+        ${isOpen 
+          ? 'translate-x-0 w-64' 
+          : '-translate-x-full w-64 lg:translate-x-0 lg:w-20'
+        }`}
     >
       {/* Header */}
-      <div className="p-5 text-center border-b border-white border-opacity-10">
-        <h2 className="m-0 text-2xl font-bold">
+      <div className="p-5 text-center border-b border-white border-opacity-10 flex items-center justify-between lg:justify-center">
+        <h2 className={`m-0 text-2xl font-bold ${!isOpen && 'lg:text-base'}`}>
           {isOpen ? 'SolarFlow' : 'SF'}
         </h2>
+        {/* Close button - Only on mobile */}
+        {isOpen && (
+          <button 
+            onClick={toggleSidebar}
+            className="lg:hidden text-white text-2xl p-2 hover:bg-white/10 rounded-lg"
+          >
+            <FaTimes />
+          </button>
+        )}
       </div>
       
       {/* Navigation */}
@@ -43,8 +55,15 @@ const Sidebar = ({ isOpen }) => {
           <NavLink
             key={item.path}
             to={item.path}
+            onClick={() => {
+              // Auto close sidebar on mobile when clicking a link
+              if (window.innerWidth < 1024) {
+                toggleSidebar();
+              }
+            }}
             className={({ isActive }) =>
-              `flex items-center px-5 py-4 text-white/80 no-underline transition-all duration-300 gap-4 hover:bg-white/10 hover:text-white
+              `flex items-center px-5 py-4 text-white/80 no-underline transition-all duration-300 hover:bg-white/10 hover:text-white
+              ${isOpen ? 'gap-4' : 'gap-0 lg:justify-center'}
               ${isActive ? 'bg-white/15 text-white border-l-4 border-green-500' : ''}`
             }
           >
@@ -62,9 +81,10 @@ const Sidebar = ({ isOpen }) => {
 
       {/* Footer - Logout */}
       <div className="p-5 border-t border-white border-opacity-10">
-        <button className="w-full px-3 py-3 bg-white/10 border-none text-white rounded-md cursor-pointer flex items-center justify-center gap-2.5 text-[15px] hover:bg-white/20 transition-colors">
+        <button className={`w-full px-3 py-3 bg-white/10 border-none text-white rounded-md cursor-pointer flex items-center transition-colors hover:bg-white/20
+          ${isOpen ? 'justify-center gap-2.5' : 'justify-center lg:justify-center'}`}>
           <FaSignOutAlt />
-          {isOpen && <span>Logout</span>}
+          {isOpen && <span className="text-[15px]">Logout</span>}
         </button>
       </div>
     </div>

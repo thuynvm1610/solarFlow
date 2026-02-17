@@ -12,15 +12,23 @@ const AdminLayout = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
-      <Sidebar isOpen={sidebarOpen} />
+      {/* Overlay for mobile when sidebar is open */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-[999] lg:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+      
       <div 
-        className={`flex-1 transition-all duration-300 ease-in-out max-w-full overflow-x-hidden
-          ${sidebarOpen ? 'ml-64' : 'ml-20'} 
-          lg:${sidebarOpen ? 'ml-64' : 'ml-20'}
-          max-lg:ml-0`}
+        className={`flex-1 transition-all duration-300 ease-in-out w-full
+          ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}
+          ml-0`}
       >
         <Header toggleSidebar={toggleSidebar} />
-        <div className="p-5 min-h-[calc(100vh-70px)] max-w-full overflow-x-hidden">
+        <div className="p-5 lg:p-8 min-h-[calc(100vh-70px)]">
           <Outlet />
         </div>
       </div>
