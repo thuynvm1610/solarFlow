@@ -35,8 +35,9 @@ public class Room {
     @Column(nullable = false)
     private Integer floor;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 30)
-    private String status;
+    private Room.RoomStatus status;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -46,11 +47,11 @@ public class Room {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ✅ XÓA QUAN HỆ NGƯỢC VỚI BOOKING
-    // @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
-    // private List<Booking> bookings;
-
     // Quan hệ với BookingRoom
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<BookingRoom> bookingRooms;
+
+    public enum RoomStatus {
+        AVAILABLE, OCCUPIED, MAINTENANCE
+    }
 }

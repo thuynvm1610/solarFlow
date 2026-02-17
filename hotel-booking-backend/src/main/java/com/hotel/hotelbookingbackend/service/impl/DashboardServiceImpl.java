@@ -2,6 +2,8 @@ package com.hotel.hotelbookingbackend.service.impl;
 
 import com.hotel.hotelbookingbackend.dto.*;
 import com.hotel.hotelbookingbackend.entity.Booking;
+import com.hotel.hotelbookingbackend.entity.Hotel;
+import com.hotel.hotelbookingbackend.entity.Room;
 import com.hotel.hotelbookingbackend.repository.*;
 import com.hotel.hotelbookingbackend.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,16 +67,16 @@ public class DashboardServiceImpl implements DashboardService {
             // Total rooms
             stats.setTotalRooms(roomRepository.count());
 
-            // ✅ Available rooms - Phòng trống (có thể thuê)
-            Long availableRooms = roomRepository.countByStatus("AVAILABLE");
+            // Available rooms - Phòng trống (có thể thuê)
+            Long availableRooms = roomRepository.countByStatus(Room.RoomStatus.AVAILABLE);
             stats.setAvailableRooms(availableRooms != null ? availableRooms : 0L);
 
-            // ✅ Occupied rooms - Phòng đang được thuê
-            Long occupiedRooms = roomRepository.countByStatus("OCCUPIED");
+            // Occupied rooms - Phòng đang được thuê
+            Long occupiedRooms = roomRepository.countByStatus(Room.RoomStatus.OCCUPIED);
             stats.setOccupiedRooms(occupiedRooms != null ? occupiedRooms : 0L);
 
-            // ✅ Maintenance rooms - Phòng đang bảo trì (không thể thuê)
-            Long maintenanceRooms = roomRepository.countByStatus("MAINTENANCE");
+            // Maintenance rooms - Phòng đang bảo trì (không thể thuê)
+            Long maintenanceRooms = roomRepository.countByStatus(Room.RoomStatus.MAINTENANCE);
             stats.setMaintenanceRooms(maintenanceRooms != null ? maintenanceRooms : 0L);
 
             // Total users
@@ -83,9 +85,9 @@ public class DashboardServiceImpl implements DashboardService {
             // Total hotels
             stats.setTotalHotels(hotelRepository.count());
 
-            // ✅ Active hotels
-            List<com.hotel.hotelbookingbackend.entity.Hotel> activeHotels = hotelRepository.findByStatus("ACTIVE");
-            stats.setActiveHotels((long) activeHotels.size());
+            // Active hotels
+            Long activeHotels = hotelRepository.countByStatus(Hotel.HotelStatus.ACTIVE);
+            stats.setActiveHotels(activeHotels);
 
             return stats;
 

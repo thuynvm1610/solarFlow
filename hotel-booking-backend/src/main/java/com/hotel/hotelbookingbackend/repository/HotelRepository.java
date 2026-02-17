@@ -13,7 +13,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
 
     List<Hotel> findByCity(String city);
 
-    List<Hotel> findByStatus(String status);
+    Long countByStatus(Hotel.HotelStatus status);
 
     @Query("SELECT h FROM Hotel h WHERE h.starRating >= :rating")
     List<Hotel> findByMinimumRating(@Param("rating") Integer rating);

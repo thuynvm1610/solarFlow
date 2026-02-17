@@ -63,8 +63,9 @@ public class Hotel {
     @Column(name = "manager_id")
     private Long managerId;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private String status;
+    private HotelStatus status;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -91,5 +92,9 @@ public class Hotel {
 
     public enum HotelType {
         HOTEL, RESORT, HOMESTAY
+    }
+
+    public enum HotelStatus {
+        ACTIVE, MAINTENANCE, CLOSED
     }
 }
