@@ -122,17 +122,6 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public List<RecentBookingDTO> getRecentBookings(int limit) {
-        try {
-            List<RecentBookingDTO> bookings = bookingRepository.getRecentBookings(PageRequest.of(0, limit));
-            return bookings != null ? bookings : new ArrayList<>();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
-    }
-
-    @Override
     public List<HotelStatsByCityDTO> getHotelStatsByCity() {
         try {
             return hotelRepository.getHotelCountByCity();

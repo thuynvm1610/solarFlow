@@ -26,12 +26,6 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.getMonthlyRevenue(year));
     }
 
-    @GetMapping("/bookings/recent")
-    public ResponseEntity<List<RecentBookingDTO>> getRecentBookings(
-            @RequestParam(defaultValue = "10") int limit) {
-        return ResponseEntity.ok(dashboardService.getRecentBookings(limit));
-    }
-
     @GetMapping("/hotels/by-city")
     public ResponseEntity<List<HotelStatsByCityDTO>> getHotelStatsByCity() {
         return ResponseEntity.ok(dashboardService.getHotelStatsByCity());

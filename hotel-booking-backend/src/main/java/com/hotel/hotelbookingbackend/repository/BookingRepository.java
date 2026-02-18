@@ -46,12 +46,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             """)
     List<MonthlyRevenueDTO> getMonthlyRevenue(@Param("year") int year);
 
-    @Query("SELECT new com.hotel.hotelbookingbackend.dto.RecentBookingDTO(b.id, b.bookingCode, u.fullName, " +
-            "(SELECT r.roomNumber FROM BookingRoom br JOIN br.room r WHERE br.booking.id = b.id ORDER BY br.id ASC LIMIT 1), " +
-            "b.checkInDate, b.checkOutDate, b.totalPrice, CAST(b.status AS string)) " +
-            "FROM Booking b JOIN b.user u ORDER BY b.createdAt DESC")
-    List<RecentBookingDTO> getRecentBookings(Pageable pageable);
-
     @Query("""
             SELECT new com.hotel.hotelbookingbackend.dto.TopHotelByBookingsDTO(h.id, h.name, COUNT(b))
             FROM Hotel h JOIN h.bookings b

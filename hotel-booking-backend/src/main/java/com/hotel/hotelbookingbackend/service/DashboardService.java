@@ -10,8 +10,6 @@ public interface DashboardService {
 
     List<MonthlyRevenueDTO> getMonthlyRevenue(int year);
 
-    List<RecentBookingDTO> getRecentBookings(int limit);
-
     List<HotelStatsByCityDTO> getHotelStatsByCity();
 
     List<HotelStatsByStarDTO> getHotelStatsByStar();
