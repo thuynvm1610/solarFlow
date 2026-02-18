@@ -88,6 +88,9 @@ public class Hotel {
     private List<Image> images;
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
+    private List<Booking> bookings;
+
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
     private List<Review> reviews;
 
     public enum HotelType {

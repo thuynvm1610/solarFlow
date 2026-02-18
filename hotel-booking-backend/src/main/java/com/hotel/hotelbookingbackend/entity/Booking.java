@@ -61,7 +61,6 @@ public class Booking {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Quan hệ với BookingRoom (nhiều rooms qua bảng trung gian)
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
     private List<BookingRoom> bookingRooms;
 

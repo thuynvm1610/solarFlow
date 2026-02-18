@@ -20,15 +20,11 @@ import java.util.Optional;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    Optional<Booking> findByBookingCode(String bookingCode);
-
-    List<Booking> findByUserId(Long userId);
-
-    List<Booking> findByHotelId(Long hotelId);
-
-    List<Booking> findByStatus(Booking.BookingStatus status);
-
-    @Query("SELECT COUNT(b) FROM Booking b WHERE b.status = :status")
+    @Query("""
+            SELECT COUNT(b)
+            FROM Booking b
+            WHERE b.status = :status
+            """)
     Long countByStatus(@Param("status") Booking.BookingStatus status);
 
     @Query("""
@@ -56,27 +52,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "FROM Booking b JOIN b.user u ORDER BY b.createdAt DESC")
     List<RecentBookingDTO> getRecentBookings(Pageable pageable);
 
-    @Query("SELECT b FROM Booking b " +
-            "JOIN b.bookingRooms br " +
-            "WHERE br.room.id = :roomId " +
-            "AND ((b.checkInDate BETWEEN :checkIn AND :checkOut) " +
-            "OR (b.checkOutDate BETWEEN :checkIn AND :checkOut) " +
-            "OR (b.checkInDate <= :checkIn AND b.checkOutDate >= :checkOut)) " +
-            "AND b.status NOT IN ('CANCELLED', 'EXPIRED')")
-    List<Booking> findConflictingBookings(
-            @Param("roomId") Long roomId,
-            @Param("checkIn") LocalDate checkIn,
-            @Param("checkOut") LocalDate checkOut
-    );
-
-    @Query("SELECT b FROM Booking b WHERE b.user.id = :userId ORDER BY b.createdAt DESC")
-    List<Booking> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
-
-    @Query("SELECT new com.hotel.hotelbookingbackend.dto.TopHotelByBookingsDTO(h.id, h.name, COUNT(b)) " +
-            "FROM Booking b JOIN b.hotel h " +
-            "WHERE b.status != 'CANCELLED' " +
-            "GROUP BY h.id, h.name " +
-            "ORDER BY COUNT(b) DESC")
+    @Query("""
+            SELECT new com.hotel.hotelbookingbackend.dto.TopHotelByBookingsDTO(h.id, h.name, COUNT(b))
+            FROM Hotel h JOIN h.bookings b
+            WHERE b.status NOT IN ('CANCELLED','PENDING')
+            GROUP BY h.id, h.name
+            ORDER BY COUNT(b) DESC
+            """)
     List<TopHotelByBookingsDTO> getTopHotelsByBookings(Pageable pageable);
 
     @Query("""
