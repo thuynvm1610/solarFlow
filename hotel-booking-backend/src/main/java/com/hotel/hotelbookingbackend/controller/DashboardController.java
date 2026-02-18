@@ -31,6 +31,11 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.getHotelStatsByCity());
     }
 
+    @GetMapping("/hotels/by-type")
+    public ResponseEntity<List<HotelStatsByTypeDTO>> getHotelStatsByType() {
+        return ResponseEntity.ok(dashboardService.getHotelStatsByType());
+    }
+
     @GetMapping("/hotels/by-star")
     public ResponseEntity<List<HotelStatsByStarDTO>> getHotelStatsByStar() {
         return ResponseEntity.ok(dashboardService.getHotelStatsByStar());

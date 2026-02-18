@@ -19,4 +19,6 @@ public interface DashboardService {
     List<TopHotelByRatingDTO> getTopHotelsByRating(int limit);
 
     List<YearlyRevenueDTO> getYearlyRevenue(int limit);
+
+    List<HotelStatsByTypeDTO> getHotelStatsByType();
 }

@@ -170,4 +170,14 @@ public class DashboardServiceImpl implements DashboardService {
             return new ArrayList<>();
         }
     }
+
+    @Override
+    public List<HotelStatsByTypeDTO> getHotelStatsByType() {
+        try {
+            return hotelRepository.getHotelStatsByType();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 }

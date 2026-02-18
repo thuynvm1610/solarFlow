@@ -2,6 +2,7 @@ package com.hotel.hotelbookingbackend.repository;
 
 import com.hotel.hotelbookingbackend.dto.HotelStatsByCityDTO;
 import com.hotel.hotelbookingbackend.dto.HotelStatsByStarDTO;
+import com.hotel.hotelbookingbackend.dto.HotelStatsByTypeDTO;
 import com.hotel.hotelbookingbackend.entity.Hotel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,11 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             ORDER BY h.starRating
             """)
     List<HotelStatsByStarDTO> getHotelCountByStar();
+
+    @Query("""
+            SELECT new com.hotel.hotelbookingbackend.dto.HotelStatsByTypeDTO(h.type, COUNT(h))
+            FROM Hotel h
+            GROUP BY h.type
+            """)
+    List<HotelStatsByTypeDTO> getHotelStatsByType();
 }

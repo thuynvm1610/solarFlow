@@ -40,6 +40,7 @@ const Dashboard = () => {
   const [lastYearRevenue, setLastYearRevenue] = useState([]);
   const [yearlyRevenue, setYearlyRevenue] = useState([]);
   const [hotelsByCity, setHotelsByCity] = useState([]);
+  const [hotelsByType, setHotelsByType] = useState([]);
   const [hotelsByStar, setHotelsByStar] = useState([]);
   const [topHotelsByBookings, setTopHotelsByBookings] = useState([]);
   const [topHotelsByRating, setTopHotelsByRating] = useState([]);
@@ -55,13 +56,14 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       const [
         statsRes,
         currentYearRes,
         lastYearRes,
         yearlyRes,
         cityRes,
+        typeRes,
         starRes,
         topBookingsRes,
         topRatingsRes
@@ -71,6 +73,7 @@ const Dashboard = () => {
         api.get(`/dashboard/revenue/monthly?year=${currentYear - 1}`),
         api.get('/dashboard/revenue/yearly?limit=3'),
         api.get('/dashboard/hotels/by-city'),
+        api.get('/dashboard/hotels/by-type'),
         api.get('/dashboard/hotels/by-star'),
         api.get('/dashboard/hotels/top-bookings?limit=3'),
         api.get('/dashboard/hotels/top-ratings?limit=3'),
@@ -81,10 +84,11 @@ const Dashboard = () => {
       setLastYearRevenue(lastYearRes.data);
       setYearlyRevenue(yearlyRes.data);
       setHotelsByCity(cityRes.data);
+      setHotelsByType(typeRes.data);
       setHotelsByStar(starRes.data);
       setTopHotelsByBookings(topBookingsRes.data);
       setTopHotelsByRating(topRatingsRes.data);
-      
+
       setError(null);
     } catch (error) {
       console.error('Lỗi khi tải dữ liệu dashboard:', error);
@@ -175,6 +179,25 @@ const Dashboard = () => {
     ],
   };
 
+  const hotelsByTypeData = {
+    labels: hotelsByType.map(item => item.type),
+    datasets: [
+      {
+        data: hotelsByType.map(item => item.hotelCount),
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(255, 206, 86, 0.8)',
+          'rgba(75, 192, 192, 0.8)',
+          'rgba(153, 102, 255, 0.8)',
+          'rgba(255, 159, 64, 0.8)',
+        ],
+        borderWidth: 2,
+        borderColor: '#fff',
+      },
+    ],
+  };
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: true,
@@ -198,7 +221,7 @@ const Dashboard = () => {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: function(value) {
+          callback: function (value) {
             return value.toFixed(1) + ' Tỷ';
           }
         }
@@ -219,8 +242,8 @@ const Dashboard = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
         <p className="text-lg text-red-500 text-center mb-5">{error}</p>
-        <button 
-          onClick={fetchDashboardData} 
+        <button
+          onClick={fetchDashboardData}
           className="px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
         >
           Thử Lại
@@ -233,27 +256,27 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 lg:mb-8 gap-4">
-      <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-2">Trang Tổng Quan</h1>
-        <p className="text-sm lg:text-base text-gray-600">Chào mừng trở lại! Đây là những gì đang diễn ra trong hệ thống khách sạn của bạn hôm nay.</p>
-      </div>
-      <div className="flex gap-3 lg:gap-5 w-full lg:w-auto">
-        <div className="flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 lg:py-3 bg-white rounded-xl shadow-card flex-1 lg:flex-initial">
-          <FaHotel className="text-xl lg:text-2xl text-blue-500" />
-          <div>
-            <span className="block text-lg lg:text-xl font-bold text-gray-800">{stats?.totalHotels || 0}</span>
-            <span className="block text-xs text-gray-500">Khách Sạn</span>
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-2">Trang Tổng Quan</h1>
+          <p className="text-sm lg:text-base text-gray-600">Chào mừng trở lại! Đây là những gì đang diễn ra trong hệ thống khách sạn của bạn hôm nay.</p>
+        </div>
+        <div className="flex gap-3 lg:gap-5 w-full lg:w-auto">
+          <div className="flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 lg:py-3 bg-white rounded-xl shadow-card flex-1 lg:flex-initial">
+            <FaHotel className="text-xl lg:text-2xl text-blue-500" />
+            <div>
+              <span className="block text-lg lg:text-xl font-bold text-gray-800">{stats?.totalHotels || 0}</span>
+              <span className="block text-xs text-gray-500">Khách Sạn</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 lg:py-3 bg-white rounded-xl shadow-card flex-1 lg:flex-initial">
+            <FaUsers className="text-xl lg:text-2xl text-blue-500" />
+            <div>
+              <span className="block text-lg lg:text-xl font-bold text-gray-800">{stats?.totalUsers || 0}</span>
+              <span className="block text-xs text-gray-500">Người Dùng</span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-2 lg:py-3 bg-white rounded-xl shadow-card flex-1 lg:flex-initial">
-          <FaUsers className="text-xl lg:text-2xl text-blue-500" />
-          <div>
-            <span className="block text-lg lg:text-xl font-bold text-gray-800">{stats?.totalUsers || 0}</span>
-            <span className="block text-xs text-gray-500">Người Dùng</span>
-          </div>
-        </div>
       </div>
-    </div>
 
       {/* Main Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
@@ -309,7 +332,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
         {/* Phòng Đang Thuê */}
         <div className="bg-white rounded-xl p-5 shadow-card border-l-4 border-red-500 hover:shadow-card-hover transition-shadow">
@@ -489,6 +512,16 @@ const Dashboard = () => {
             </div>
             <div className="h-72">
               <Pie data={hotelsByCityData} options={chartOptions} />
+            </div>
+          </div>
+
+          {/* Hotel by type */}
+          <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
+            <div className="mb-5 pb-3 border-b-2 border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-800">KS Phân Bố Theo Loại</h2>
+            </div>
+            <div className="h-72">
+              <Pie data={hotelsByTypeData} options={chartOptions} />
             </div>
           </div>
         </div>
