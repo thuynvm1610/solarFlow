@@ -6,9 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -16,7 +20,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,15 +49,15 @@ public class User {
     private String phone;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private Role role;
+    @Column(length = 20, nullable = false)
+    private Role role = Role.CUSTOMER;
 
     @Column(name = "image_url")
     private String imageUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private UserStatus status;
+    @Column(length = 20, nullable = false)
+    private UserStatus status = UserStatus.ACTIVE;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -69,15 +73,84 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Review> reviews;
 
+    // ============================================
+    // ENUMS
+    // ============================================
+
     public enum Gender {
-        MALE, FEMALE, OTHER
+        MALE,
+        FEMALE,
+        OTHER
     }
 
     public enum Role {
-        ADMIN, CUSTOMER, MANAGER
+        ADMIN,
+        MANAGER,
+        CUSTOMER
     }
 
     public enum UserStatus {
-        ACTIVE, INACTIVE, BANNED
+        ACTIVE,     // Đang hoạt động
+        INACTIVE,   // Tạm ngừng
+        BANNED      // Bị cấm
+    }
+
+    // ============================================
+    // LIFECYCLE CALLBACKS
+    // ============================================
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+        if (updatedAt == null) {
+            updatedAt = LocalDateTime.now();
+        }
+        if (role == null) {
+            role = Role.CUSTOMER;
+        }
+        if (status == null) {
+            status = UserStatus.ACTIVE;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    // ============================================
+    // USERDETAILS IMPLEMENTATION
+    // ============================================
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return status != UserStatus.BANNED;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return status == UserStatus.ACTIVE;
     }
 }

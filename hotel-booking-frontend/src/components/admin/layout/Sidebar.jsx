@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import {
+import { useAuth } from '../../../contexts/AuthContext';import {
   FaTachometerAlt,
   FaCalendarCheck,
   FaHotel,
@@ -14,6 +14,7 @@ import {
 } from 'react-icons/fa';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
+  const { logout } = useAuth();
   const menuItems = [
     { path: '/admin/dashboard', icon: <FaTachometerAlt />, label: 'Dashboard' },
     { path: '/admin/bookings', icon: <FaCalendarCheck />, label: 'Đơn đặt phòng' },
@@ -26,10 +27,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   ];
 
   return (
-    <div 
+    <div
       className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-[#1e3c72] to-[#2a5298] text-white transition-all duration-300 ease-in-out z-[1000] flex flex-col
-        ${isOpen 
-          ? 'translate-x-0 w-64' 
+        ${isOpen
+          ? 'translate-x-0 w-64'
           : '-translate-x-full w-64 lg:translate-x-0 lg:w-20'
         }`}
     >
@@ -40,7 +41,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         </h2>
         {/* Close button - Only on mobile */}
         {isOpen && (
-          <button 
+          <button
             onClick={toggleSidebar}
             className="lg:hidden text-white text-2xl p-2 hover:bg-white/10 rounded-lg"
           >
@@ -48,7 +49,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </button>
         )}
       </div>
-      
+
       {/* Navigation */}
       <nav className="flex-1 py-5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-white/10">
         {menuItems.map((item) => (
@@ -81,8 +82,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
       {/* Footer - Logout */}
       <div className="p-5 border-t border-white border-opacity-10">
-        <button className={`w-full px-3 py-3 bg-white/10 border-none text-white rounded-md cursor-pointer flex items-center transition-colors hover:bg-white/20
-          ${isOpen ? 'justify-center gap-2.5' : 'justify-center lg:justify-center'}`}>
+        <button
+          onClick={logout}
+          className={`w-full px-3 py-3 bg-white/10 border-none text-white rounded-md cursor-pointer flex items-center transition-colors hover:bg-white/20
+      ${isOpen ? 'justify-center gap-2.5' : 'justify-center lg:justify-center'}`}
+        >
           <FaSignOutAlt />
           {isOpen && <span className="text-[15px]">Logout</span>}
         </button>
