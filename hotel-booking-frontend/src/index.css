@@ -2,36 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Scrollbar */
+/* Smooth Animations */
 @layer utilities {
+  .animate-spin-slow {
+    animation: spin 1s linear infinite;
+  }
+
+  /* Custom Scrollbar */
   .scrollbar-thin::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
   }
   
   .scrollbar-thin::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent;
   }
   
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
+    background: #e5e7eb;
+    border-radius: 3px;
   }
 
-  .scrollbar-thumb-white\/30::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
   }
 
-  .scrollbar-track-white\/10::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
+  /* Smooth transitions */
+  * {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
   }
 }
 
-/* Animation */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* Ring Animation */
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
 }
 
-.animate-spin-slow {
-  animation: spin 1s linear infinite;
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
 }
