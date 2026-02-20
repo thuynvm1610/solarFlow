@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaHotel } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,7 +9,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -17,197 +16,380 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     const result = await login(email, password);
-    
     if (result.success) {
-      // Redirect based on role
       if (result.user.role === 'ADMIN' || result.user.role === 'MANAGER') {
         navigate('/admin/dashboard');
       } else {
-        navigate('/'); // Customer dashboard or home page
+        navigate('/');
       }
     } else {
       setError(result.error);
     }
-    
     setLoading(false);
   };
 
-  const fillDemoAccount = (role) => {
-    switch(role) {
-      case 'admin':
-        setEmail('admin@hotel.com');
-        setPassword('admin123');
-        break;
-      case 'manager':
-        setEmail('manager@hotel.com');
-        setPassword('manager123');
-        break;
-      case 'customer':
-        setEmail('customer1@hotel.com');
-        setPassword('customer123');
-        break;
-      default:
-        break;
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-8 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4">
-            <FaHotel className="text-4xl text-blue-500" />
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        .login-root {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 50%, #c7d2fe 100%);
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          padding: 24px;
+        }
+
+        .login-card {
+          background: #ffffff;
+          border-radius: 20px;
+          box-shadow: 0 8px 48px rgba(29,78,216,0.15), 0 2px 8px rgba(29,78,216,0.08);
+          width: 100%;
+          max-width: 420px;
+          padding: 48px 44px;
+          border: 1.5px solid #93c5fd;
+        }
+
+        /* Brand */
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 36px;
+        }
+
+        .brand-logo {
+          width: 42px; height: 42px;
+          background: linear-gradient(135deg, #1d4ed8, #2563eb);
+          border-radius: 11px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 15px;
+          font-weight: 700;
+          color: #fff;
+          flex-shrink: 0;
+          box-shadow: 0 4px 14px rgba(29,78,216,0.4);
+        }
+
+        .brand-text {
+          display: flex; flex-direction: column; gap: 2px;
+        }
+
+        .brand-name {
+          font-size: 15px;
+          font-weight: 700;
+          color: #1e3a8a;
+          line-height: 1;
+        }
+
+        .brand-sub {
+          font-size: 11px;
+          font-weight: 500;
+          color: #3b82f6;
+        }
+
+        /* Heading */
+        .form-heading { margin-bottom: 28px; }
+
+        .form-title {
+          font-size: 26px;
+          font-weight: 700;
+          color: #1e3a8a;
+          margin-bottom: 5px;
+        }
+
+        .form-subtitle {
+          font-size: 13px;
+          font-weight: 500;
+          color: #64748b;
+        }
+
+        /* Error */
+        .error-box {
+          background: #fff5f5;
+          border: 1px solid #fca5a5;
+          border-radius: 10px;
+          padding: 11px 14px;
+          margin-bottom: 20px;
+          font-size: 13px;
+          color: #dc2626;
+          display: flex; align-items: center; gap: 8px;
+          font-weight: 500;
+        }
+
+        .error-dot {
+          width: 5px; height: 5px;
+          border-radius: 50%;
+          background: #dc2626;
+          flex-shrink: 0;
+        }
+
+        /* Fields */
+        .field-group { margin-bottom: 16px; }
+
+        .field-label {
+          display: block;
+          font-size: 12px;
+          font-weight: 700;
+          color: #1e40af;
+          margin-bottom: 7px;
+          letter-spacing: 0.2px;
+        }
+
+        .field-wrapper {
+          position: relative;
+          display: flex; align-items: center;
+        }
+
+        .field-icon {
+          position: absolute;
+          left: 14px;
+          color: #93c5fd;
+          font-size: 13px;
+          pointer-events: none;
+          transition: color 0.15s;
+        }
+
+        .field-wrapper:focus-within .field-icon { color: #1d4ed8; }
+
+        .form-input {
+          width: 100%;
+          padding: 12px 14px 12px 40px;
+          background: #eff6ff;
+          border: 1.5px solid #93c5fd;
+          border-radius: 10px;
+          color: #1e3a8a;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          outline: none;
+          transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+        }
+
+        .form-input::placeholder { color: #93c5fd; }
+
+        .form-input:focus {
+          border-color: #1d4ed8;
+          background: #fff;
+          box-shadow: 0 0 0 3px rgba(29,78,216,0.12);
+        }
+
+        .form-input.has-right-icon { padding-right: 44px; }
+
+        .toggle-password {
+          position: absolute;
+          right: 13px;
+          background: none;
+          border: none;
+          color: #93c5fd;
+          cursor: pointer;
+          font-size: 14px;
+          padding: 4px;
+          display: flex; align-items: center;
+          transition: color 0.15s;
+        }
+
+        .toggle-password:hover { color: #1d4ed8; }
+
+        /* Options */
+        .options-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin: 12px 0 24px;
+        }
+
+        .remember-label {
+          display: flex; align-items: center; gap: 7px;
+          font-size: 12px;
+          font-weight: 500;
+          color: #475569;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .remember-check {
+          width: 14px; height: 14px;
+          cursor: pointer;
+          accent-color: #1d4ed8;
+        }
+
+        .forgot-link {
+          font-size: 12px;
+          font-weight: 700;
+          color: #1d4ed8;
+          text-decoration: none;
+          transition: color 0.15s;
+        }
+
+        .forgot-link:hover { color: #1e40af; }
+
+        /* Button */
+        .btn-submit {
+          width: 100%;
+          padding: 13px;
+          background: linear-gradient(135deg, #1d4ed8, #2563eb);
+          border: none;
+          border-radius: 10px;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 14px;
+          font-weight: 700;
+          color: #fff;
+          cursor: pointer;
+          transition: opacity 0.15s, box-shadow 0.15s, transform 0.1s;
+          box-shadow: 0 4px 18px rgba(29,78,216,0.4);
+          display: flex; align-items: center; justify-content: center; gap: 8px;
+          letter-spacing: 0.2px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+          opacity: 0.9;
+          box-shadow: 0 6px 24px rgba(29,78,216,0.5);
+        }
+
+        .btn-submit:active:not(:disabled) { transform: scale(0.99); }
+        .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        .spinner {
+          width: 14px; height: 14px;
+          border: 2px solid rgba(255,255,255,0.4);
+          border-top-color: #fff;
+          border-radius: 50%;
+          animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Divider */
+        .divider {
+          display: flex; align-items: center; gap: 12px;
+          margin: 22px 0;
+        }
+
+        .divider-line { flex: 1; height: 1px; background: #bfdbfe; }
+
+        .divider-text {
+          font-size: 11px;
+          font-weight: 600;
+          color: #60a5fa;
+        }
+
+        /* Register */
+        .register-row {
+          text-align: center;
+          font-size: 13px;
+          font-weight: 500;
+          color: #64748b;
+        }
+
+        .register-link {
+          color: #1d4ed8;
+          text-decoration: none;
+          font-weight: 700;
+          transition: color 0.15s;
+        }
+
+        .register-link:hover { color: #1e40af; }
+      `}</style>
+
+      <div className="login-root">
+        <div className="login-card">
+
+          <div className="brand">
+            <div className="brand-logo">SF</div>
+            <div className="brand-text">
+              <span className="brand-name">SolarFlow Hotel</span>
+              <span className="brand-sub">Hệ thống quản lý khách sạn</span>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">SolarFlow Hotel</h1>
-          <p className="text-blue-100">Hệ thống quản lý khách sạn</p>
-        </div>
 
-        {/* Form */}
-        <div className="p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Đăng nhập</h2>
+          <div className="form-heading">
+            <h1 className="form-title">Đăng nhập</h1>
+            <p className="form-subtitle">Chào mừng trở lại!</p>
+          </div>
 
-          {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <p className="ml-3 text-sm text-red-700">{error}</p>
-              </div>
+            <div className="error-box">
+              <span className="error-dot" />
+              {error}
             </div>
           )}
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaEnvelope className="text-gray-400" />
-                </div>
+          <form onSubmit={handleSubmit}>
+            <div className="field-group">
+              <label className="field-label">Email</label>
+              <div className="field-wrapper">
+                <FaEnvelope className="field-icon" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  className="form-input"
                   placeholder="your.email@example.com"
                   required
                 />
               </div>
             </div>
 
-            {/* Password Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mật khẩu
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="text-gray-400" />
-                </div>
+            <div className="field-group">
+              <label className="field-label">Mật khẩu</label>
+              <div className="field-wrapper">
+                <FaLock className="field-icon" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  className="form-input has-right-icon"
                   placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
+                  className="toggle-password"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
             </div>
 
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                />
-                <span className="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
+            <div className="options-row">
+              <label className="remember-label">
+                <input type="checkbox" className="remember-check" />
+                Ghi nhớ đăng nhập
               </label>
-              <a href="#" className="text-sm text-blue-500 hover:text-blue-600 font-medium">
-                Quên mật khẩu?
-              </a>
+              <a href="/forgot-password" className="forgot-link">Quên mật khẩu?</a>
             </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-            >
+            <button type="submit" className="btn-submit" disabled={loading}>
               {loading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                <>
+                  <span className="spinner" />
                   Đang đăng nhập...
-                </div>
-              ) : (
-                'Đăng nhập'
-              )}
+                </>
+              ) : 'Đăng nhập'}
             </button>
           </form>
 
-          {/* Demo Accounts */}
-          <div className="mt-8 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-            <p className="text-xs font-semibold text-gray-700 mb-3 text-center">
-              🔑 Tài khoản demo - Click để tự động điền
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => fillDemoAccount('admin')}
-                className="px-3 py-2 bg-white text-xs font-medium text-gray-700 rounded-md hover:bg-blue-50 hover:text-blue-600 border border-gray-300 transition-colors"
-              >
-                👑 Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => fillDemoAccount('manager')}
-                className="px-3 py-2 bg-white text-xs font-medium text-gray-700 rounded-md hover:bg-green-50 hover:text-green-600 border border-gray-300 transition-colors"
-              >
-                👔 Manager
-              </button>
-              <button
-                type="button"
-                onClick={() => fillDemoAccount('customer')}
-                className="px-3 py-2 bg-white text-xs font-medium text-gray-700 rounded-md hover:bg-purple-50 hover:text-purple-600 border border-gray-300 transition-colors"
-              >
-                👤 Customer
-              </button>
-            </div>
-            <div className="mt-3 space-y-1 text-xs text-gray-600">
-              <p>• Admin: admin@hotel.com / admin123</p>
-              <p>• Manager: manager@hotel.com / manager123</p>
-              <p>• Customer: customer1@hotel.com / customer123</p>
-            </div>
+          <div className="divider">
+            <div className="divider-line" />
+            <span className="divider-text">hoặc</span>
+            <div className="divider-line" />
           </div>
 
-          {/* Register Link */}
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <div className="register-row">
             Chưa có tài khoản?{' '}
-            <a href="#" className="text-blue-500 hover:text-blue-600 font-medium">
-              Đăng ký ngay
-            </a>
-          </p>
+            <a href="/register" className="register-link">Đăng ký ngay</a>
+          </div>
+
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
