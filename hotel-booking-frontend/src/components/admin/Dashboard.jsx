@@ -253,7 +253,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 lg:mb-8 gap-4">
         <div>
@@ -508,9 +508,12 @@ const Dashboard = () => {
           {/* City Distribution */}
           <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
             <div className="mb-5 pb-3 border-b-2 border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-800">KS Phân Bố Theo TP</h2>
+              <h2 className="text-lg font-semibold text-gray-800">
+                KS Phân Bố Theo TP
+              </h2>
             </div>
-            <div className="h-72">
+
+            <div className="h-72 flex justify-center items-center">
               <Pie data={hotelsByCityData} options={chartOptions} />
             </div>
           </div>
@@ -520,7 +523,7 @@ const Dashboard = () => {
             <div className="mb-5 pb-3 border-b-2 border-gray-100">
               <h2 className="text-lg font-semibold text-gray-800">KS Phân Bố Theo Loại</h2>
             </div>
-            <div className="h-72">
+            <div className="h-72 flex justify-center items-center">
               <Pie data={hotelsByTypeData} options={chartOptions} />
             </div>
           </div>
