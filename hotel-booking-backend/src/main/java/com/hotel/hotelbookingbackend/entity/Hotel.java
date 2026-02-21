@@ -23,7 +23,7 @@ public class Hotel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
@@ -32,9 +32,11 @@ public class Hotel {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private HotelType type;
+    @Column(nullable = false, length = 500)
+    private String address;
+
+    @Column(length = 30, nullable = false)
+    private String city;
 
     @Column(name = "star_rating")
     private Integer starRating;
@@ -42,10 +44,10 @@ public class Hotel {
     @Column(name = "review_rating", precision = 3, scale = 1)
     private BigDecimal reviewRating;
 
-    @Column(name = "check_in_time")
+    @Column(name = "check_in_time", nullable = false)
     private LocalTime checkInTime;
 
-    @Column(name = "check_out_time")
+    @Column(name = "check_out_time", nullable = false)
     private LocalTime checkOutTime;
 
     @Column(name = "check_in_instructions", columnDefinition = "TEXT")
@@ -54,19 +56,6 @@ public class Hotel {
     @Column(name = "policy_text", columnDefinition = "TEXT")
     private String policyText;
 
-    @Column(nullable = false, length = 500)
-    private String address;
-
-    @Column(length = 30)
-    private String city;
-
-    @Column(name = "manager_id")
-    private Long managerId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private HotelStatus status;
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -74,6 +63,37 @@ public class Hotel {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // ============================================
+    // ENUM
+    // ============================================
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private HotelType type;
+
+    public enum HotelType {
+        HOTEL, HOMESTAY, RESORT
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private HotelStatus status = HotelStatus.ACTIVE;
+
+    public enum HotelStatus {
+        ACTIVE, MAINTENANCE, CLOSED
+    }
+
+    // ============================================
+    // RELATIONSHIP
+    // ============================================
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id", nullable = false)
+    private User manager;
+
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
+    private List<RoomType> roomTypes;
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
     private List<Room> rooms;
@@ -85,19 +105,18 @@ public class Hotel {
     private List<HotelExtraService> hotelExtraServices;
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
-    private List<Image> images;
-
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
     private List<Booking> bookings;
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
     private List<Review> reviews;
 
-    public enum HotelType {
-        HOTEL, RESORT, HOMESTAY
-    }
+    // ============================================
+    // TRANSIENT FIELDS FOR FILTERING
+    // ============================================
 
-    public enum HotelStatus {
-        ACTIVE, MAINTENANCE, CLOSED
-    }
+    @Transient
+    private Long totalRooms;
+
+    @Transient
+    private Long totalBookings;
 }

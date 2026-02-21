@@ -18,7 +18,7 @@ public class Amenity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, unique = true, length = 50)
     private String code;
 
     @Column(nullable = false)
@@ -27,12 +27,27 @@ public class Amenity {
     @Column(length = 100)
     private String icon;
 
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
+    // ============================================
+    // ENUM
+    // ============================================
+
     @Enumerated(EnumType.STRING)
-    @Column(length = 50)
+    @Column(nullable = false)
     private AmenityCategory category;
 
-    @Column(name = "is_active")
-    private Boolean isActive;
+    public enum AmenityCategory {
+        ROOM_FEATURE, FREE_SERVICE, EXTRA_SERVICE
+    }
+
+    // ============================================
+    // RELATIONSHIP
+    // ============================================
+
+    @OneToMany(mappedBy = "amenity", cascade = CascadeType.ALL)
+    private List<AmenityPromotion> amenityPromotions;
 
     @OneToMany(mappedBy = "amenity", cascade = CascadeType.ALL)
     private List<HotelAmenity> hotelAmenities;
@@ -40,7 +55,9 @@ public class Amenity {
     @OneToMany(mappedBy = "amenity", cascade = CascadeType.ALL)
     private List<RoomTypeAmenity> roomTypeAmenities;
 
-    public enum AmenityCategory {
-        GENERAL, BATHROOM, BEDROOM, ENTERTAINMENT, FOOD_DRINK, SERVICES, OUTDOOR
-    }
+    @OneToMany(mappedBy = "amenity", cascade = CascadeType.ALL)
+    private List<HotelExtraService> hotelExtraServices;
+
+    @OneToMany(mappedBy = "amenity", cascade = CascadeType.ALL)
+    private List<BookingRoomService> bookingRoomServices;
 }

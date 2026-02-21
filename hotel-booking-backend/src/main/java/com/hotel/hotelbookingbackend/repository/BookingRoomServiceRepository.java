@@ -9,7 +9,4 @@ import java.util.List;
 @Repository
 public interface BookingRoomServiceRepository extends JpaRepository<BookingRoomService, Long> {
 
-    List<BookingRoomService> findByBookingRoomId(Long bookingRoomId);
-
-    List<BookingRoomService> findByAmenityId(Long amenityId);
 }

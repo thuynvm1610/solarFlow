@@ -17,11 +17,15 @@ public class HotelAmenity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    // ============================================
+    // RELATIONSHIP
+    // ============================================
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "amenity_id", nullable = false)
     private Amenity amenity;
 }

@@ -17,11 +17,15 @@ public class AmenityPromotion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    // ============================================
+    // RELATIONSHIP
+    // ============================================
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "amenity_id", nullable = false)
     private Amenity amenity;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "promotion_id", nullable = false)
     private Promotion promotion;
 }

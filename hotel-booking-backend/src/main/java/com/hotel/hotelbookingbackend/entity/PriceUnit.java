@@ -18,7 +18,7 @@ public class PriceUnit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, unique = true, length = 50)
     private String code;
 
     @Column(nullable = false, length = 100)
@@ -26,6 +26,10 @@ public class PriceUnit {
 
     @Column
     private String description;
+
+    // ============================================
+    // RELATIONSHIP
+    // ============================================
 
     @OneToMany(mappedBy = "priceUnit", cascade = CascadeType.ALL)
     private List<HotelExtraService> hotelExtraServices;

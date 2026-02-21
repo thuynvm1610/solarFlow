@@ -23,29 +23,37 @@ public class Promotion {
     @Column(nullable = false)
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "discount_type", length = 20)
-    private DiscountType discountType;
-
-    @Column(name = "discount_value", precision = 10, scale = 2)
+    @Column(name = "discount_value", precision = 10, scale = 2, nullable = false)
     private BigDecimal discountValue;
 
-    @Column(name = "start_date")
+    @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
-    @Column(name = "end_date")
+    @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    @Column(name = "is_active")
-    private Boolean isActive;
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
+    // ============================================
+    // ENUM
+    // ============================================
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_type", nullable = false)
+    private DiscountType discountType;
+
+    public enum DiscountType {
+        PERCENT, FIXED
+    }
+
+    // ============================================
+    // RELATIONSHIP
+    // ============================================
 
     @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL)
     private List<RoomTypePromotion> roomTypePromotions;
 
     @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL)
     private List<AmenityPromotion> amenityPromotions;
-
-    public enum DiscountType {
-        PERCENTAGE, FIXED_AMOUNT
-    }
 }

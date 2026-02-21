@@ -19,31 +19,31 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "owner_type", length = 50)
-    private OwnerType ownerType;
-
     @Column(name = "owner_id", nullable = false)
     private Long ownerId;
 
     @Column(name = "image_url", nullable = false, length = 500)
     private String imageUrl;
 
-    @Column(name = "is_primary")
-    private Boolean isPrimary;
+    @Column(name = "is_primary", nullable = false)
+    private Boolean isPrimary = false;
 
-    @Column(name = "primary_owner_id")
+    @Column(name = "primary_owner_id", insertable = false, updatable = false)
     private Long primaryOwnerId;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "hotel_id", insertable = false, updatable = false)
-    private Hotel hotel;
+    // ============================================
+    // ENUM
+    // ============================================
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "owner_type", nullable = false)
+    private OwnerType ownerType;
 
     public enum OwnerType {
-        HOTEL, ROOM_TYPE, USER
+        HOTEL, ROOM_TYPE
     }
 }

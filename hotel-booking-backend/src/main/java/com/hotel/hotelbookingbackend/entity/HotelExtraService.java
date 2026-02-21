@@ -18,18 +18,22 @@ public class HotelExtraService {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @Column(name = "base_price", precision = 12, scale = 2, nullable = false)
+    private BigDecimal basePrice;
+
+    // ============================================
+    // RELATIONSHIP
+    // ============================================
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "amenity_id", nullable = false)
     private Amenity amenity;
 
-    @Column(name = "base_price", precision = 12, scale = 2)
-    private BigDecimal basePrice;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "unit_id", nullable = false)
     private PriceUnit priceUnit;
 }

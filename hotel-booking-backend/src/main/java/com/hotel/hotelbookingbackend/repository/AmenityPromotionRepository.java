@@ -9,7 +9,4 @@ import java.util.List;
 @Repository
 public interface AmenityPromotionRepository extends JpaRepository<AmenityPromotion, Long> {
 
-    List<AmenityPromotion> findByPromotionId(Long promotionId);
-
-    List<AmenityPromotion> findByAmenityId(Long amenityId);
 }

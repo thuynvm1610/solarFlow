@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "booking_rooms")
@@ -18,14 +19,21 @@ public class BookingRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @Column(name = "price_per_night", precision = 12, scale = 2, nullable = false)
+    private BigDecimal pricePerNight;
+
+    // ============================================
+    // RELATIONSHIP
+    // ============================================
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
-    @Column(name = "price_per_night", precision = 12, scale = 2)
-    private BigDecimal pricePerNight;
+    @OneToMany(mappedBy = "bookingRoom", cascade = CascadeType.ALL)
+    private List<BookingRoomService> bookingRoomServices;
 }

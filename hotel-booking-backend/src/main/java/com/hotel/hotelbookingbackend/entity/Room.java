@@ -21,37 +21,36 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "hotel_id", nullable = false)
-    private Hotel hotel;
-
-    @ManyToOne
-    @JoinColumn(name = "room_type_id", nullable = false)
-    private RoomType roomType;
-
-    @Column(name = "room_number", nullable = false, length = 20)
+    @Column(name = "room_number", length = 20, nullable = false)
     private String roomNumber;
 
-    @Column(nullable = false)
+    @Column
     private Integer floor;
 
+    // ============================================
+    // ENUM
+    // ============================================
+
     @Enumerated(EnumType.STRING)
-    @Column(length = 30)
-    private Room.RoomStatus status;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    // Quan hệ với BookingRoom
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
-    private List<BookingRoom> bookingRooms;
+    @Column(nullable = false)
+    private RoomStatus status = RoomStatus.AVAILABLE;
 
     public enum RoomStatus {
         AVAILABLE, OCCUPIED, MAINTENANCE
     }
+
+    // ============================================
+    // RELATIONSHIP
+    // ============================================
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+    private List<BookingRoom> bookingRooms;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id", nullable = false)
+    private Hotel hotel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_type_id", nullable = false)
+    private RoomType roomType;
 }

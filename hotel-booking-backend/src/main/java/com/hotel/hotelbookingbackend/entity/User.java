@@ -32,14 +32,10 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "full_name")
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private Gender gender;
-
-    @Column(name = "dob")
+    @Column
     private LocalDate dob;
 
     @Column(length = 50)
@@ -48,16 +44,8 @@ public class User implements UserDetails {
     @Column(length = 12)
     private String phone;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20, nullable = false)
-    private Role role = Role.CUSTOMER;
-
-    @Column(name = "image_url")
+    @Column(name = "image_url", length = 500)
     private String imageUrl;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20, nullable = false)
-    private UserStatus status = UserStatus.ACTIVE;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -67,33 +55,51 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // ============================================
+    // ENUMS
+    // ============================================
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private Gender gender;
+
+    public enum Gender {
+        MALE,
+        FEMALE
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.CUSTOMER;
+
+    public enum Role {
+        ADMIN,
+        HOTEL_MANAGER,
+        CUSTOMER
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus status = UserStatus.ACTIVE;
+
+    public enum UserStatus {
+        ACTIVE,
+        BANNED
+    }
+
+    // ============================================
+    // RELATIONSHIP
+    // ============================================
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Booking> bookings;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Review> reviews;
 
-    // ============================================
-    // ENUMS
-    // ============================================
-
-    public enum Gender {
-        MALE,
-        FEMALE,
-        OTHER
-    }
-
-    public enum Role {
-        ADMIN,
-        MANAGER,
-        CUSTOMER
-    }
-
-    public enum UserStatus {
-        ACTIVE,     // Đang hoạt động
-        INACTIVE,   // Tạm ngừng
-        BANNED      // Bị cấm
-    }
+    // FIX: đổi mappedBy = "manager" để khớp với field "manager" trong Hotel
+    @OneToMany(mappedBy = "manager", cascade = CascadeType.ALL)
+    private List<Hotel> hotels;
 
     // ============================================
     // LIFECYCLE CALLBACKS
