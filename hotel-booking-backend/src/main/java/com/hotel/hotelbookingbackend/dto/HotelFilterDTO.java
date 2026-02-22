@@ -40,12 +40,11 @@ public class HotelFilterDTO {
     private Long minTotalBookings;
     private Long maxTotalBookings;
 
-    // Room types
-    private List<Long> roomTypeIds;
+    private List<String> roomTypeNames;
 
     // Pagination
     private Integer page = 0;
-    private Integer size = 3;
+    private Integer size = 20;
 
     // Sorting
     private String sortBy = "id";

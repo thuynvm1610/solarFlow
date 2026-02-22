@@ -11,14 +11,13 @@ import {
   FaCalendarCheck,
   FaClock,
   FaTimes,
-  FaChevronLeft,
-  FaChevronRight,
   FaSortAmountUp,
   FaSortAmountDown,
   FaImage,
   FaPlus
 } from 'react-icons/fa';
 import api from '../../services/api';
+import Pagination from '../common/Pagination';
 
 const HotelManagement = () => {
   // State for hotels data
@@ -37,7 +36,7 @@ const HotelManagement = () => {
     cities: [],
     hotelTypes: [],
     statuses: [],
-    roomTypes: [],
+    roomTypeNames: [],
     minStarRating: 1,
     maxStarRating: 5,
     minFloors: 1,
@@ -50,16 +49,15 @@ const HotelManagement = () => {
     type: '',
     city: '',
     status: '',
-    starRating: '',
-    minReviewRating: '',
-    maxReviewRating: '',
+    starRatingRange: [1, 5],
+    reviewRatingRange: [0, 10],
     minFloors: '',
     maxFloors: '',
     minTotalRooms: '',
     maxTotalRooms: '',
     minTotalBookings: '',
     maxTotalBookings: '',
-    roomTypeIds: [],
+    roomTypeNames: [],
     sortBy: 'name',
     sortDirection: 'ASC'
   });
@@ -100,23 +98,35 @@ const HotelManagement = () => {
     try {
       setLoading(true);
 
-      // Build clean filter object - remove empty values
       const cleanFilters = {};
 
       if (filters.name && filters.name.trim()) cleanFilters.name = filters.name.trim();
       if (filters.type) cleanFilters.type = filters.type;
       if (filters.city) cleanFilters.city = filters.city;
       if (filters.status) cleanFilters.status = filters.status;
-      if (filters.starRating) cleanFilters.starRating = parseInt(filters.starRating);
-      if (filters.minReviewRating) cleanFilters.minReviewRating = parseFloat(filters.minReviewRating);
-      if (filters.maxReviewRating) cleanFilters.maxReviewRating = parseFloat(filters.maxReviewRating);
+
+      // ✅ THAY ĐỔI: Gửi range cho star rating
+      if (filters.starRatingRange[0] > 1 || filters.starRatingRange[1] < 5) {
+        cleanFilters.minStarRating = filters.starRatingRange[0];
+        cleanFilters.maxStarRating = filters.starRatingRange[1];
+      }
+
+      // ✅ THAY ĐỔI: Gửi range cho review rating
+      if (filters.reviewRatingRange[0] > 0 || filters.reviewRatingRange[1] < 10) {
+        cleanFilters.minReviewRating = filters.reviewRatingRange[0];
+        cleanFilters.maxReviewRating = filters.reviewRatingRange[1];
+      }
+
       if (filters.minFloors) cleanFilters.minFloors = parseInt(filters.minFloors);
       if (filters.maxFloors) cleanFilters.maxFloors = parseInt(filters.maxFloors);
       if (filters.minTotalRooms) cleanFilters.minTotalRooms = parseInt(filters.minTotalRooms);
       if (filters.maxTotalRooms) cleanFilters.maxTotalRooms = parseInt(filters.maxTotalRooms);
       if (filters.minTotalBookings) cleanFilters.minTotalBookings = parseInt(filters.minTotalBookings);
       if (filters.maxTotalBookings) cleanFilters.maxTotalBookings = parseInt(filters.maxTotalBookings);
-      if (filters.roomTypeIds && filters.roomTypeIds.length > 0) cleanFilters.roomTypeIds = filters.roomTypeIds;
+
+      if (filters.roomTypeNames && filters.roomTypeNames.length > 0) {
+        cleanFilters.roomTypeNames = filters.roomTypeNames;
+      }
 
       const requestBody = {
         ...cleanFilters,
@@ -126,7 +136,7 @@ const HotelManagement = () => {
         sortDirection: filters.sortDirection
       };
 
-      console.log('Filter request:', requestBody); // Debug
+      console.log('Filter request:', requestBody);
 
       const response = await api.post('/hotels/filter', requestBody);
 
@@ -152,16 +162,16 @@ const HotelManagement = () => {
     }));
   };
 
-  const handleRoomTypeToggle = (roomTypeId) => {
+  const handleRoomTypeToggle = (roomTypeName) => {
     setFilters(prev => {
-      const currentRoomTypes = prev.roomTypeIds || [];
-      const newRoomTypes = currentRoomTypes.includes(roomTypeId)
-        ? currentRoomTypes.filter(id => id !== roomTypeId)
-        : [...currentRoomTypes, roomTypeId];
+      const currentRoomTypes = prev.roomTypeNames || [];
+      const newRoomTypes = currentRoomTypes.includes(roomTypeName)
+        ? currentRoomTypes.filter(name => name !== roomTypeName)
+        : [...currentRoomTypes, roomTypeName];
 
       return {
         ...prev,
-        roomTypeIds: newRoomTypes
+        roomTypeNames: newRoomTypes
       };
     });
   };
@@ -177,20 +187,18 @@ const HotelManagement = () => {
       type: '',
       city: '',
       status: '',
-      starRating: '',
-      minReviewRating: '',
-      maxReviewRating: '',
+      starRatingRange: [1, 5],
+      reviewRatingRange: [0, 10],
       minFloors: '',
       maxFloors: '',
       minTotalRooms: '',
       maxTotalRooms: '',
       minTotalBookings: '',
       maxTotalBookings: '',
-      roomTypeIds: [],
+      roomTypeNames: [],
       sortBy: 'name',
       sortDirection: 'ASC'
     });
-    // Reset xong thì fetch lại
     setTimeout(() => {
       fetchHotels(0);
       setShowFilterPanel(false);
@@ -203,17 +211,52 @@ const HotelManagement = () => {
     if (filters.type) count++;
     if (filters.city) count++;
     if (filters.status) count++;
-    if (filters.starRating) count++;
-    if (filters.minReviewRating) count++;
-    if (filters.maxReviewRating) count++;
+    if (filters.starRatingRange[0] > 1 || filters.starRatingRange[1] < 5) count++;     // ✅
+    if (filters.reviewRatingRange[0] > 0 || filters.reviewRatingRange[1] < 10) count++; // ✅
     if (filters.minFloors) count++;
     if (filters.maxFloors) count++;
     if (filters.minTotalRooms) count++;
     if (filters.maxTotalRooms) count++;
     if (filters.minTotalBookings) count++;
     if (filters.maxTotalBookings) count++;
-    if (filters.roomTypeIds && filters.roomTypeIds.length > 0) count++;
+    if (filters.roomTypeNames && filters.roomTypeNames.length > 0) count++;
     setActiveFiltersCount(count);
+  };
+
+  const handleStarRangeChange = (e, index) => {
+    const newRange = [...filters.starRatingRange];
+    newRange[index] = parseInt(e.target.value);
+
+    // Ensure min <= max
+    if (index === 0 && newRange[0] > newRange[1]) {
+      newRange[1] = newRange[0];
+    }
+    if (index === 1 && newRange[1] < newRange[0]) {
+      newRange[0] = newRange[1];
+    }
+
+    setFilters(prev => ({
+      ...prev,
+      starRatingRange: newRange
+    }));
+  };
+
+  const handleReviewRangeChange = (e, index) => {
+    const newRange = [...filters.reviewRatingRange];
+    newRange[index] = parseFloat(e.target.value);
+
+    // Ensure min <= max
+    if (index === 0 && newRange[0] > newRange[1]) {
+      newRange[1] = newRange[0];
+    }
+    if (index === 1 && newRange[1] < newRange[0]) {
+      newRange[0] = newRange[1];
+    }
+
+    setFilters(prev => ({
+      ...prev,
+      reviewRatingRange: newRange
+    }));
   };
 
   const handlePageChange = (newPage) => {
@@ -245,7 +288,7 @@ const HotelManagement = () => {
     const typeConfig = {
       HOTEL: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Khách sạn' },
       RESORT: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'Khu nghỉ dưỡng' },
-      HOME_STAY: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Homestay' }
+      HOME_STAY: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Nhà nghỉ' }
     };
 
     const config = typeConfig[type] || typeConfig.HOTEL;
@@ -323,8 +366,8 @@ const HotelManagement = () => {
             <button
               onClick={() => setShowFilterPanel(!showFilterPanel)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors ${showFilterPanel || activeFiltersCount > 0
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
             >
               <FaFilter />
@@ -369,7 +412,7 @@ const HotelManagement = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Hotel Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -425,21 +468,103 @@ const HotelManagement = () => {
               </select>
             </div>
 
-            {/* Star Rating */}
+            {/* Star Rating Range - Compact */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-600 mb-2 flex items-center gap-1.5">
+                <FaStar className="text-yellow-400 text-xs" />
                 Số Sao
+                <span className="ml-auto font-semibold text-gray-800">
+                  {filters.starRatingRange[0]}–{filters.starRatingRange[1]}★
+                </span>
               </label>
-              <select
-                value={filters.starRating}
-                onChange={(e) => handleFilterChange('starRating', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              >
-                <option value="">Tất cả</option>
-                {[1, 2, 3, 4, 5].map(star => (
-                  <option key={star} value={star}>{star} ⭐</option>
-                ))}
-              </select>
+              {/* Star toggle buttons */}
+              <div className="flex gap-1 mb-2">
+                {[1, 2, 3, 4, 5].map(star => {
+                  const inRange = star >= filters.starRatingRange[0] && star <= filters.starRatingRange[1];
+                  return (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => {
+                        const [min, max] = filters.starRatingRange;
+                        let newMin = min, newMax = max;
+                        if (star < min) newMin = star;
+                        else if (star > max) newMax = star;
+                        else if (star === min && star === max) { newMin = 1; newMax = 5; }
+                        else if (star === min) newMin = star + 1;
+                        else newMax = star - 1;
+                        setFilters(prev => ({ ...prev, starRatingRange: [newMin, newMax] }));
+                      }}
+                      className={`flex-1 py-1.5 rounded text-xs font-bold transition-all duration-150 active:scale-95
+                        ${inRange
+                          ? 'bg-yellow-400 text-white shadow-sm shadow-yellow-200'
+                          : 'bg-gray-100 text-gray-400 hover:bg-yellow-50 hover:text-yellow-400'}`}
+                    >
+                      {star}★
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex gap-1.5">
+                <div className="flex-1">
+                  <input
+                    type="range" min="1" max="5" step="1"
+                    value={filters.starRatingRange[0]}
+                    onChange={(e) => handleStarRangeChange(e, 0)}
+                    className="w-full h-1.5 rounded appearance-none cursor-pointer accent-yellow-400"
+                  />
+                </div>
+                <div className="flex-1">
+                  <input
+                    type="range" min="1" max="5" step="1"
+                    value={filters.starRatingRange[1]}
+                    onChange={(e) => handleStarRangeChange(e, 1)}
+                    className="w-full h-1.5 rounded appearance-none cursor-pointer accent-yellow-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Review Rating Range - Compact */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-2 flex items-center gap-1.5">
+                <span className="text-green-500 font-bold text-xs">★</span>
+                Điểm Đánh Giá
+                <span className="ml-auto font-semibold text-gray-800">
+                  {filters.reviewRatingRange[0].toFixed(1)}–{filters.reviewRatingRange[1].toFixed(1)}
+                </span>
+              </label>
+              {/* Continuous track with filled range */}
+              <div className="relative h-4 flex items-center mb-1.5">
+                <div className="absolute w-full h-1.5 bg-gray-200 rounded-full" />
+                <div
+                  className="absolute h-1.5 bg-green-400 rounded-full transition-all"
+                  style={{
+                    left: `${(filters.reviewRatingRange[0] / 10) * 100}%`,
+                    width: `${((filters.reviewRatingRange[1] - filters.reviewRatingRange[0]) / 10) * 100}%`
+                  }}
+                />
+              </div>
+              <div className="flex gap-1.5">
+                <div className="flex-1">
+                  <div className="flex justify-between text-[10px] text-gray-400 mb-0.5"><span>0</span><span>Min</span></div>
+                  <input
+                    type="range" min="0" max="10" step="0.5"
+                    value={filters.reviewRatingRange[0]}
+                    onChange={(e) => handleReviewRangeChange(e, 0)}
+                    className="w-full h-1.5 rounded appearance-none cursor-pointer accent-green-500"
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between text-[10px] text-gray-400 mb-0.5"><span>Max</span><span>10</span></div>
+                  <input
+                    type="range" min="0" max="10" step="0.5"
+                    value={filters.reviewRatingRange[1]}
+                    onChange={(e) => handleReviewRangeChange(e, 1)}
+                    className="w-full h-1.5 rounded appearance-none cursor-pointer accent-green-500"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Floor Number Range */}
@@ -460,31 +585,6 @@ const HotelManagement = () => {
                   placeholder="Max"
                   value={filters.maxFloors}
                   onChange={(e) => handleFilterChange('maxFloors', e.target.value)}
-                  className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Review Rating Range */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Đánh Giá (Min - Max)
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  step="0.1"
-                  placeholder="Min"
-                  value={filters.minReviewRating}
-                  onChange={(e) => handleFilterChange('minReviewRating', e.target.value)}
-                  className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                />
-                <input
-                  type="number"
-                  step="0.1"
-                  placeholder="Max"
-                  value={filters.maxReviewRating}
-                  onChange={(e) => handleFilterChange('maxReviewRating', e.target.value)}
                   className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 />
               </div>
@@ -567,22 +667,22 @@ const HotelManagement = () => {
           </div>
 
           {/* Room Types Filter */}
-          {filterOptions.roomTypes.length > 0 && (
-            <div className="mt-4">
+          {filterOptions.roomTypeNames && filterOptions.roomTypeNames.length > 0 && (
+            <div className="mt-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Loại Phòng Có Sẵn
               </label>
               <div className="flex flex-wrap gap-2">
-                {filterOptions.roomTypes.map(roomType => (
+                {filterOptions.roomTypeNames.map(roomTypeName => (
                   <button
-                    key={roomType.id}
-                    onClick={() => handleRoomTypeToggle(roomType.id)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filters.roomTypeIds?.includes(roomType.id)
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    key={roomTypeName}
+                    onClick={() => handleRoomTypeToggle(roomTypeName)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filters.roomTypeNames?.includes(roomTypeName)
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                   >
-                    {roomType.name}
+                    {roomTypeName}
                   </button>
                 ))}
               </div>
@@ -759,120 +859,13 @@ const HotelManagement = () => {
           </div>
 
           {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 flex-wrap">
-              {/* First Page Button */}
-              <button
-                onClick={() => handlePageChange(0)}
-                disabled={pagination.page === 0}
-                className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="Trang đầu"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                </svg>
-              </button>
-
-              {/* Previous Page Button */}
-              <button
-                onClick={() => handlePageChange(pagination.page - 1)}
-                disabled={pagination.page === 0}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <FaChevronLeft />
-              </button>
-
-              {/* Page Numbers */}
-              {(() => {
-                const pages = [];
-                const totalPages = pagination.totalPages;
-                const currentPage = pagination.page;
-
-                // Always show first page
-                pages.push(
-                  <button
-                    key={0}
-                    onClick={() => handlePageChange(0)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${0 === currentPage
-                        ? 'bg-blue-500 text-white'
-                        : 'border border-gray-300 hover:bg-gray-50'
-                      }`}
-                  >
-                    1
-                  </button>
-                );
-
-                // Show dots if needed
-                if (currentPage > 2) {
-                  pages.push(
-                    <span key="dots-start" className="px-2 text-gray-400">...</span>
-                  );
-                }
-
-                // Show pages around current page
-                for (let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages - 2, currentPage + 1); i++) {
-                  pages.push(
-                    <button
-                      key={i}
-                      onClick={() => handlePageChange(i)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${i === currentPage
-                          ? 'bg-blue-500 text-white'
-                          : 'border border-gray-300 hover:bg-gray-50'
-                        }`}
-                    >
-                      {i + 1}
-                    </button>
-                  );
-                }
-
-                // Show dots if needed
-                if (currentPage < totalPages - 3) {
-                  pages.push(
-                    <span key="dots-end" className="px-2 text-gray-400">...</span>
-                  );
-                }
-
-                // Always show last page (if more than 1 page)
-                if (totalPages > 1) {
-                  pages.push(
-                    <button
-                      key={totalPages - 1}
-                      onClick={() => handlePageChange(totalPages - 1)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${totalPages - 1 === currentPage
-                          ? 'bg-blue-500 text-white'
-                          : 'border border-gray-300 hover:bg-gray-50'
-                        }`}
-                    >
-                      {totalPages}
-                    </button>
-                  );
-                }
-
-                return pages;
-              })()}
-
-              {/* Next Page Button */}
-              <button
-                onClick={() => handlePageChange(pagination.page + 1)}
-                disabled={pagination.page >= pagination.totalPages - 1}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <FaChevronRight />
-              </button>
-
-              {/* Last Page Button */}
-              <button
-                onClick={() => handlePageChange(pagination.totalPages - 1)}
-                disabled={pagination.page >= pagination.totalPages - 1}
-                className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="Trang cuối"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          )}
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            totalElements={pagination.totalElements}
+            pageSize={pagination.size}
+            onPageChange={handlePageChange}
+          />
         </>
       )}
 

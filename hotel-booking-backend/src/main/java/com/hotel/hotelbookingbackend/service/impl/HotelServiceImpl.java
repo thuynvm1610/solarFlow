@@ -2,7 +2,6 @@ package com.hotel.hotelbookingbackend.service.impl;
 
 import com.hotel.hotelbookingbackend.dto.*;
 import com.hotel.hotelbookingbackend.entity.Hotel;
-import com.hotel.hotelbookingbackend.entity.RoomType;
 import com.hotel.hotelbookingbackend.repository.HotelRepository;
 import com.hotel.hotelbookingbackend.repository.RoomTypeRepository;
 import com.hotel.hotelbookingbackend.service.HotelService;
@@ -59,30 +58,14 @@ public class HotelServiceImpl implements HotelService {
         // Get statuses
         List<Hotel.HotelStatus> statuses = Arrays.asList(Hotel.HotelStatus.values());
 
-        // Get room types
-        List<RoomType> roomTypeEntities = roomTypeRepository.findAllDistinctRoomTypes();
-        List<RoomTypeSimpleDTO> roomTypes = roomTypeEntities.stream()
-                .map(rt -> RoomTypeSimpleDTO.builder()
-                        .id(rt.getId())
-                        .name(rt.getName())
-                        .build())
-                .collect(Collectors.toList());
-
-        // Get min/max values
-        Integer minStarRating = hotelRepository.findMinStarRating();
-        Integer maxStarRating = hotelRepository.findMaxStarRating();
-        Integer minFloors = hotelRepository.findMinFloorNumber();
-        Integer maxFloors = hotelRepository.findMaxFloorNumber();
+        // Get distinct room type names
+        List<String> roomTypeNames = roomTypeRepository.findDistinctRoomTypeNames();
 
         return FilterOptionsDTO.builder()
                 .cities(cities)
                 .hotelTypes(hotelTypes)
                 .statuses(statuses)
-                .roomTypes(roomTypes)
-                .minStarRating(minStarRating != null ? minStarRating : 1)
-                .maxStarRating(maxStarRating != null ? maxStarRating : 5)
-                .minFloors(minFloors != null ? minFloors : 1)
-                .maxFloors(maxFloors != null ? maxFloors : 50)
+                .roomTypeNames(roomTypeNames)
                 .build();
     }
 
@@ -103,12 +86,10 @@ public class HotelServiceImpl implements HotelService {
         // Count reviews
         Long reviewCount = hotelRepository.countReviewsByHotelId(hotel.getId());
 
-        // ✅ GET PRIMARY IMAGE
+        // Get primary image
         String primaryImageUrl = hotelRepository.findPrimaryImageByHotelId(hotel.getId());
 
-        // If no primary image, construct default path
         if (primaryImageUrl == null || primaryImageUrl.isEmpty()) {
-            // Default: /uploads/hotel/hotel{id}/hotel{id}_1.jpg
             primaryImageUrl = String.format("hotel%d_1.jpg", hotel.getId());
         }
 

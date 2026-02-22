@@ -16,9 +16,6 @@ public class FilterOptionsDTO {
     private List<String> cities;
     private List<Hotel.HotelType> hotelTypes;
     private List<Hotel.HotelStatus> statuses;
-    private List<RoomTypeSimpleDTO> roomTypes;
-    private Integer minStarRating;
-    private Integer maxStarRating;
-    private Integer minFloors;
-    private Integer maxFloors;
+
+    private List<String> roomTypeNames;
 }

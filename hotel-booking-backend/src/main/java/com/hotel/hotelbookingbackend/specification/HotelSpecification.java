@@ -3,6 +3,7 @@ package com.hotel.hotelbookingbackend.specification;
 import com.hotel.hotelbookingbackend.dto.HotelFilterDTO;
 import com.hotel.hotelbookingbackend.entity.Hotel;
 import com.hotel.hotelbookingbackend.entity.Room;
+import com.hotel.hotelbookingbackend.entity.RoomType;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -68,12 +69,14 @@ public class HotelSpecification {
                 predicates.add(criteriaBuilder.equal(root.get("status"), filter.getStatus()));
             }
 
-            if (filter.getRoomTypeIds() != null && !filter.getRoomTypeIds().isEmpty()) {
+            if (filter.getRoomTypeNames() != null && !filter.getRoomTypeNames().isEmpty()) {
                 Subquery<Long> roomSubquery = query.subquery(Long.class);
                 Root<Room> roomRoot = roomSubquery.from(Room.class);
+                Join<Room, RoomType> roomTypeJoin = roomRoot.join("roomType");
+
                 roomSubquery.select(roomRoot.get("hotel").get("id"))
                         .distinct(true)
-                        .where(roomRoot.get("roomType").get("id").in(filter.getRoomTypeIds()));
+                        .where(roomTypeJoin.get("name").in(filter.getRoomTypeNames()));
 
                 predicates.add(root.get("id").in(roomSubquery));
             }
@@ -93,7 +96,8 @@ public class HotelSpecification {
                 }
             }
 
-            if (filter.getRoomTypeIds() != null && !filter.getRoomTypeIds().isEmpty()) {
+            // Set distinct for main query if filtering by room types
+            if (filter.getRoomTypeNames() != null && !filter.getRoomTypeNames().isEmpty()) {
                 query.distinct(true);
             }
 
