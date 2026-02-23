@@ -18,6 +18,7 @@ import {
 } from 'react-icons/fa';
 import api from '../../services/api';
 import Pagination from '../common/Pagination';
+import CustomSelect from '../common/CustomSelect';
 
 const HotelManagement = () => {
   // State for hotels data
@@ -418,57 +419,55 @@ const HotelManagement = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Hotel Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                <FaBuilding className="text-blue-400 text-xs" />
                 Loại Hình Khách Sạn
               </label>
-              <select
+              <CustomSelect
                 value={filters.type}
-                onChange={(e) => handleFilterChange('type', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              >
-                <option value="">Tất cả</option>
-                {filterOptions.hotelTypes.map(type => (
-                  <option key={type} value={type}>
-                    {type === 'HOTEL' ? 'Khách sạn' : type === 'RESORT' ? 'Khu nghỉ dưỡng' : 'Nhà nghỉ'}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => handleFilterChange('type', val)}
+                placeholder="Tất cả loại hình"
+                icon={FaBuilding}
+                options={filterOptions.hotelTypes.map(type => ({
+                  value: type,
+                  label: type === 'HOTEL' ? 'Khách sạn' : type === 'RESORT' ? 'Khu nghỉ dưỡng' : 'Nhà nghỉ'
+                }))}
+              />
             </div>
 
             {/* City */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                <FaMapMarkerAlt className="text-red-400 text-xs" />
                 Thành Phố
               </label>
-              <select
+              <CustomSelect
                 value={filters.city}
-                onChange={(e) => handleFilterChange('city', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              >
-                <option value="">Tất cả</option>
-                {filterOptions.cities.map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
+                onChange={(val) => handleFilterChange('city', val)}
+                placeholder="Tất cả thành phố"
+                icon={FaMapMarkerAlt}
+                options={filterOptions.cities.map(city => ({
+                  value: city,
+                  label: city
+                }))}
+              />
             </div>
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
                 Trạng Thái
               </label>
-              <select
+              <CustomSelect
                 value={filters.status}
-                onChange={(e) => handleFilterChange('status', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              >
-                <option value="">Tất cả</option>
-                {filterOptions.statuses.map(status => (
-                  <option key={status} value={status}>
-                    {status === 'ACTIVE' ? 'Hoạt động' : status === 'CLOSED' ? 'Dừng hoạt động' : 'Bảo trì'}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => handleFilterChange('status', val)}
+                placeholder="Tất cả trạng thái"
+                options={filterOptions.statuses.map(status => ({
+                  value: status,
+                  label: status === 'ACTIVE' ? 'Hoạt động' : status === 'CLOSED' ? 'Dừng hoạt động' : 'Bảo trì'
+                }))}
+              />
             </div>
 
             {/* Star Rating Range - Compact */}
@@ -639,28 +638,36 @@ const HotelManagement = () => {
 
             {/* Sort By */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                {filters.sortDirection === 'ASC' ? <FaSortAmountUp className="text-blue-400 text-xs" /> : <FaSortAmountDown className="text-blue-400 text-xs" />}
                 Sắp Xếp Theo
               </label>
               <div className="flex gap-2">
-                <select
-                  value={filters.sortBy}
-                  onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                >
-                  <option value="name">Tên</option>
-                  <option value="starRating">Số sao</option>
-                  <option value="reviewRating">Đánh giá</option>
-                </select>
+                <div className="flex-1">
+                  <CustomSelect
+                    value={filters.sortBy}
+                    onChange={(val) => val && handleFilterChange('sortBy', val)}
+                    placeholder="Chọn tiêu chí"
+                    options={[
+                      { value: 'name', label: 'Tên' },
+                      { value: 'starRating', label: 'Số sao' },
+                      { value: 'reviewRating', label: 'Đánh giá' }
+                    ]}
+                  />
+                </div>
                 <button
                   onClick={() => handleFilterChange('sortDirection', filters.sortDirection === 'ASC' ? 'DESC' : 'ASC')}
-                  className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className={`px-3 py-2 rounded-xl border-2 transition-all duration-200 font-medium text-xs
+                    ${filters.sortDirection === 'ASC'
+                      ? 'border-blue-300 bg-blue-50 text-blue-600 hover:bg-blue-100'
+                      : 'border-purple-300 bg-purple-50 text-purple-600 hover:bg-purple-100'
+                    }`}
                   title={filters.sortDirection === 'ASC' ? 'Tăng dần' : 'Giảm dần'}
                 >
                   {filters.sortDirection === 'ASC' ? (
-                    <FaSortAmountUp className="text-gray-600" />
+                    <FaSortAmountUp />
                   ) : (
-                    <FaSortAmountDown className="text-gray-600" />
+                    <FaSortAmountDown />
                   )}
                 </button>
               </div>
