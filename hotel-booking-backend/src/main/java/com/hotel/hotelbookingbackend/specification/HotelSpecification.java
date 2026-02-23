@@ -1,6 +1,7 @@
 package com.hotel.hotelbookingbackend.specification;
 
 import com.hotel.hotelbookingbackend.dto.HotelFilterDTO;
+import com.hotel.hotelbookingbackend.entity.Booking;
 import com.hotel.hotelbookingbackend.entity.Hotel;
 import com.hotel.hotelbookingbackend.entity.Room;
 import com.hotel.hotelbookingbackend.entity.RoomType;
@@ -26,13 +27,13 @@ public class HotelSpecification {
 
             // Floor number filters
             if (filter.getFloorNumber() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("floorNumber"), filter.getFloorNumber()));
+                predicates.add(criteriaBuilder.equal(root.get("floor"), filter.getFloorNumber()));
             }
             if (filter.getMinFloors() != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("floorNumber"), filter.getMinFloors()));
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("floor"), filter.getMinFloors()));
             }
             if (filter.getMaxFloors() != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("floorNumber"), filter.getMaxFloors()));
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("floor"), filter.getMaxFloors()));
             }
 
             // Hotel type filter
@@ -93,6 +94,21 @@ public class HotelSpecification {
                 }
                 if (filter.getMaxTotalRooms() != null) {
                     predicates.add(criteriaBuilder.lessThanOrEqualTo(roomCountSubquery, filter.getMaxTotalRooms()));
+                }
+            }
+
+            // Total bookings filter
+            if (filter.getMinTotalBookings() != null || filter.getMaxTotalBookings() != null) {
+                Subquery<Long> bookingCountSubquery = query.subquery(Long.class);
+                Root<Booking> bookingRoot = bookingCountSubquery.from(Booking.class);
+                bookingCountSubquery.select(criteriaBuilder.count(bookingRoot))
+                        .where(criteriaBuilder.equal(bookingRoot.get("hotel").get("id"), root.get("id")));
+
+                if (filter.getMinTotalBookings() != null) {
+                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(bookingCountSubquery, filter.getMinTotalBookings()));
+                }
+                if (filter.getMaxTotalBookings() != null) {
+                    predicates.add(criteriaBuilder.lessThanOrEqualTo(bookingCountSubquery, filter.getMaxTotalBookings()));
                 }
             }
 

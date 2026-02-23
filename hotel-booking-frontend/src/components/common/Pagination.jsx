@@ -86,21 +86,11 @@ const Pagination = ({
 
   return (
     <div className="flex flex-col items-center gap-3 select-none">
-      {/* Info row */}
-      {showInfo && totalElements !== undefined && pageSize && (
-        <p className="text-xs text-gray-400">
-          Hiển thị{' '}
-          <span className="font-semibold text-gray-600">{from}–{to}</span>
-          {' '}trong{' '}
-          <span className="font-semibold text-gray-600">{totalElements}</span>
-          {' '}kết quả
-        </p>
-      )}
-
       {/* Buttons row */}
       <div className="flex items-center gap-1 flex-wrap justify-center">
         {/* First */}
         <button
+          type="button"
           onClick={() => onPageChange(0)}
           disabled={currentPage === 0}
           className={arrowBtn(currentPage === 0)}
@@ -114,6 +104,7 @@ const Pagination = ({
 
         {/* Prev */}
         <button
+          type="button"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 0}
           className={arrowBtn(currentPage === 0)}
@@ -137,6 +128,7 @@ const Pagination = ({
           }
           return (
             <button
+              type="button"
               key={page}
               onClick={() => onPageChange(page)}
               className={pageBtn(page === currentPage)}
@@ -149,6 +141,7 @@ const Pagination = ({
 
         {/* Next */}
         <button
+          type="button"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages - 1}
           className={arrowBtn(currentPage >= totalPages - 1)}
@@ -160,6 +153,7 @@ const Pagination = ({
 
         {/* Last */}
         <button
+          type="button"
           onClick={() => onPageChange(totalPages - 1)}
           disabled={currentPage >= totalPages - 1}
           className={arrowBtn(currentPage >= totalPages - 1)}

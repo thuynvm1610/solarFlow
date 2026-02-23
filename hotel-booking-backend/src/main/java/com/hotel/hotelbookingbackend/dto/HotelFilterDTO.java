@@ -44,7 +44,7 @@ public class HotelFilterDTO {
 
     // Pagination
     private Integer page = 0;
-    private Integer size = 20;
+    private Integer size = 3;
 
     // Sorting
     private String sortBy = "id";

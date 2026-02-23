@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   FaSearch,
   FaFilter,
@@ -65,6 +65,9 @@ const HotelManagement = () => {
   // State for UI
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
+
+  // Ref để giữ vị trí scroll khi chuyển trang
+  const gridRef = useRef(null);
 
   useEffect(() => {
     fetchTotalCount();
@@ -261,7 +264,7 @@ const HotelManagement = () => {
 
   const handlePageChange = (newPage) => {
     fetchHotels(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleAddHotel = () => {
@@ -288,7 +291,7 @@ const HotelManagement = () => {
     const typeConfig = {
       HOTEL: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Khách sạn' },
       RESORT: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'Khu nghỉ dưỡng' },
-      HOME_STAY: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Nhà nghỉ' }
+      HOMESTAY: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Nhà nghỉ' }
     };
 
     const config = typeConfig[type] || typeConfig.HOTEL;
@@ -302,7 +305,7 @@ const HotelManagement = () => {
 
   const getHotelImageUrl = (hotel) => {
     if (hotel.primaryImageUrl) {
-      return `http://localhost:8080/uploads/hotel/hotel${hotel.id}/${hotel.primaryImageUrl}`;
+      return `http://localhost:8080/uploads/hotel/hotel${hotel.id}/${hotel.primaryImageUrl}.jpg`;
     }
     return null;
   };
@@ -426,7 +429,7 @@ const HotelManagement = () => {
                 <option value="">Tất cả</option>
                 {filterOptions.hotelTypes.map(type => (
                   <option key={type} value={type}>
-                    {type === 'HOTEL' ? 'Khách sạn' : type === 'RESORT' ? 'Khu nghỉ dưỡng' : 'Homestay'}
+                    {type === 'HOTEL' ? 'Khách sạn' : type === 'RESORT' ? 'Khu nghỉ dưỡng' : 'Nhà nghỉ'}
                   </option>
                 ))}
               </select>
@@ -462,7 +465,7 @@ const HotelManagement = () => {
                 <option value="">Tất cả</option>
                 {filterOptions.statuses.map(status => (
                   <option key={status} value={status}>
-                    {status === 'ACTIVE' ? 'Hoạt động' : status === 'INACTIVE' ? 'Tạm ngừng' : 'Bảo trì'}
+                    {status === 'ACTIVE' ? 'Hoạt động' : status === 'CLOSED' ? 'Dừng hoạt động' : 'Bảo trì'}
                   </option>
                 ))}
               </select>
@@ -474,7 +477,7 @@ const HotelManagement = () => {
                 <FaStar className="text-yellow-400 text-xs" />
                 Số Sao
                 <span className="ml-auto font-semibold text-gray-800">
-                  {filters.starRatingRange[0]}–{filters.starRatingRange[1]}★
+                  {filters.starRatingRange[0]}–{filters.starRatingRange[1]}
                 </span>
               </label>
               {/* Star toggle buttons */}
@@ -535,7 +538,7 @@ const HotelManagement = () => {
                 </span>
               </label>
               {/* Continuous track with filled range */}
-              <div className="relative h-4 flex items-center mb-1.5">
+              <div className="relative h-4 flex items-center mb-3.5 mt-3.5">
                 <div className="absolute w-full h-1.5 bg-gray-200 rounded-full" />
                 <div
                   className="absolute h-1.5 bg-green-400 rounded-full transition-all"
@@ -547,7 +550,6 @@ const HotelManagement = () => {
               </div>
               <div className="flex gap-1.5">
                 <div className="flex-1">
-                  <div className="flex justify-between text-[10px] text-gray-400 mb-0.5"><span>0</span><span>Min</span></div>
                   <input
                     type="range" min="0" max="10" step="0.5"
                     value={filters.reviewRatingRange[0]}
@@ -556,7 +558,6 @@ const HotelManagement = () => {
                   />
                 </div>
                 <div className="flex-1">
-                  <div className="flex justify-between text-[10px] text-gray-400 mb-0.5"><span>Max</span><span>10</span></div>
                   <input
                     type="range" min="0" max="10" step="0.5"
                     value={filters.reviewRatingRange[1]}
@@ -707,8 +708,8 @@ const HotelManagement = () => {
         </div>
       )}
 
-      {/* Loading State */}
-      {loading && (
+      {/* Loading State - chỉ hiện khi chưa có data lần đầu */}
+      {loading && hotels.length === 0 && (
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
@@ -717,10 +718,20 @@ const HotelManagement = () => {
         </div>
       )}
 
-      {/* Hotels Grid */}
-      {!loading && hotels.length > 0 && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      {/* Hotels Grid - luôn render nếu có data, overlay mờ khi loading */}
+      {hotels.length > 0 && (
+        <div className="relative">
+          {/* Overlay loading khi chuyển trang */}
+          {loading && (
+            <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[1px] rounded-xl flex items-center justify-center">
+              <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-full shadow-md border border-gray-100">
+                <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+                <span className="text-sm text-gray-600 font-medium">Đang tải...</span>
+              </div>
+            </div>
+          )}
+
+          <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             {hotels.map((hotel) => (
               <div
                 key={hotel.id}
@@ -841,7 +852,7 @@ const HotelManagement = () => {
                   {hotel.availableRoomTypes && hotel.availableRoomTypes.length > 0 && (
                     <div className="pt-3 border-t border-gray-100">
                       <p className="text-xs text-gray-500 mb-2">Loại phòng có sẵn:</p>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1 min-h-[52px] content-start">
                         {hotel.availableRoomTypes.map(rt => (
                           <span
                             key={rt.id}
@@ -866,7 +877,7 @@ const HotelManagement = () => {
             pageSize={pagination.size}
             onPageChange={handlePageChange}
           />
-        </>
+        </div>
       )}
 
       {/* Empty State */}
