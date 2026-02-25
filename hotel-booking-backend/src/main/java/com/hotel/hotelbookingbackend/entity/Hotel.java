@@ -81,7 +81,7 @@ public class Hotel {
     private HotelStatus status = HotelStatus.ACTIVE;
 
     public enum HotelStatus {
-        ACTIVE, MAINTENANCE, CLOSED
+        ACTIVE, MAINTENANCE, CLOSED, PENDING_REVIEW
     }
 
     // ============================================

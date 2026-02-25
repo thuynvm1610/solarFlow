@@ -11,4 +11,7 @@ import java.util.List;
 @Repository
 public interface HotelExtraServiceRepository extends JpaRepository<HotelExtraService, Long> {
 
+    List<HotelExtraService> findByHotelId(Long hotelId);
+
+    void deleteByHotelId(Long hotelId);
 }

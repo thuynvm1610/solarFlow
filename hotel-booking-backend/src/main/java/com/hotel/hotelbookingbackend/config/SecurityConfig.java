@@ -3,6 +3,7 @@ package com.hotel.hotelbookingbackend.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -38,12 +39,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // ── Public endpoints ──────────────────────────────
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/hotels/images/temp").permitAll()
+
+                        // ── Protected endpoints ───────────────────────────
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "HOTEL_MANAGER")
                         .requestMatchers("/api/dashboard/**").hasAnyRole("ADMIN", "HOTEL_MANAGER")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
-                        .requestMatchers("/api/hotels/**").hasAnyRole("ADMIN", "HOTEL_MANAGER")
+                        .requestMatchers("/api/hotels/**").hasAnyRole("ADMIN", "HOTEL_MANAGER") // wildcard sau
                         .requestMatchers("/api/rooms/**").hasAnyRole("ADMIN", "HOTEL_MANAGER")
                         .requestMatchers("/api/bookings/**").hasAnyRole("ADMIN", "HOTEL_MANAGER", "CUSTOMER")
                         .requestMatchers("/api/reviews/**").hasAnyRole("ADMIN", "HOTEL_MANAGER", "CUSTOMER")

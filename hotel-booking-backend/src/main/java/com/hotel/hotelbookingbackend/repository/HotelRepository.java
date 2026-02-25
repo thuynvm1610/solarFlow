@@ -70,4 +70,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Long>, JpaSpecific
 
     @Query("SELECT i.imageUrl FROM Image i WHERE i.ownerType = 'HOTEL' AND i.ownerId = :hotelId AND i.isPrimary = true")
     String findPrimaryImageByHotelId(@Param("hotelId") Long hotelId);
+
+    @Query("SELECT DISTINCT h.manager.id FROM Hotel h WHERE h.manager.id IS NOT NULL")
+    List<Long> findAllManagerIds();
 }

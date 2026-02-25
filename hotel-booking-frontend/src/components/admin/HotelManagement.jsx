@@ -19,6 +19,8 @@ import {
 import api from '../../services/api';
 import Pagination from '../common/Pagination';
 import CustomSelect from '../common/CustomSelect';
+import CreateHotelModal from './hotel/CreateHotelModal'
+import EditHotelModal from './hotel/EditHotelModal'
 
 const HotelManagement = () => {
   // State for hotels data
@@ -69,6 +71,19 @@ const HotelManagement = () => {
 
   // Ref để giữ vị trí scroll khi chuyển trang
   const gridRef = useRef(null);
+
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [editingHotelId, setEditingHotelId] = useState(null)
+
+  const handleCreateSuccess = () => {
+    setShowCreateModal(false)
+    fetchHotels() // hàm load danh sách đang có sẵn trong file
+  }
+
+  const handleEditSuccess = () => {
+    setEditingHotelId(null)
+    fetchHotels()
+  }
 
   useEffect(() => {
     fetchTotalCount();
@@ -393,7 +408,7 @@ const HotelManagement = () => {
 
             {/* Add Hotel Button */}
             <button
-              onClick={handleAddHotel}
+              onClick={() => setShowCreateModal(true)}
               className="flex items-center gap-2 px-6 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
             >
               <FaPlus />
@@ -465,7 +480,7 @@ const HotelManagement = () => {
                 placeholder="Tất cả trạng thái"
                 options={filterOptions.statuses.map(status => ({
                   value: status,
-                  label: status === 'ACTIVE' ? 'Hoạt động' : status === 'CLOSED' ? 'Dừng hoạt động' : 'Bảo trì'
+                  label: status === 'ACTIVE' ? 'Hoạt động' : status === 'CLOSED' ? 'Dừng hoạt động' : status === 'MAINTENANCE' ? 'Bảo trì' : 'Đang review'
                 }))}
               />
             </div>
@@ -871,6 +886,14 @@ const HotelManagement = () => {
                       </div>
                     </div>
                   )}
+                  <div className="flex gap-2 pt-3 mt-2 border-t border-gray-100">
+                    <button
+                      className="flex-1 px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                      onClick={() => setEditingHotelId(hotel.id)}
+                    >
+                      Sửa
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -904,6 +927,21 @@ const HotelManagement = () => {
             Đặt Lại Bộ Lọc
           </button>
         </div>
+      )}
+
+      {showCreateModal && (
+        <CreateHotelModal
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={handleCreateSuccess}
+        />
+      )}
+
+      {editingHotelId && (
+        <EditHotelModal
+          hotelId={editingHotelId}
+          onClose={() => setEditingHotelId(null)}
+          onSuccess={handleEditSuccess}
+        />
       )}
     </div>
   );
