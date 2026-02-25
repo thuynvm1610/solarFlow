@@ -1,5 +1,3 @@
-// src/contexts/CreateHotelContext.jsx
-
 import { createContext, useContext, useReducer } from 'react'
 
 const defaultState = {
@@ -22,7 +20,7 @@ const defaultState = {
     freeAmenityIds: [],
     paidAmenities: [],
   },
-  // ✅ THÊM: Custom room types
+
   customRoomTypes: [],  // [{ tempId, name, description, maxAdults, maxChildren, basePrice, areaM2, featureIds: [], images: [] }]
 
   floorConfigs: [],
@@ -65,12 +63,12 @@ function reducer(state, action) {
     }
 
     case 'TOGGLE_PAID_AMENITY': {
-      const id = action.payload
+      const { id, name } = action.payload
       if (state.amenities.freeAmenityIds.includes(id)) return state
       const exists = state.amenities.paidAmenities.some(p => p.amenityId === id)
       const paidAmenities = exists
         ? state.amenities.paidAmenities.filter(p => p.amenityId !== id)
-        : [...state.amenities.paidAmenities, { amenityId: id, basePrice: '', unitId: null }]
+        : [...state.amenities.paidAmenities, { amenityId: id, name, basePrice: '', unitId: null }]
       return { ...state, amenities: { ...state.amenities, paidAmenities } }
     }
 

@@ -118,7 +118,7 @@ function Step2Form({ formOptions, useCtx }) {
                       </div>
 
                       <button
-                        onClick={() => dispatch({ type: 'TOGGLE_PAID_AMENITY', payload: amenity.id })}
+                        onClick={() => dispatch({ type: 'TOGGLE_PAID_AMENITY', payload: {id: amenity.id, name: amenity.name}})}
                         className={`
                           px-4 py-1.5 rounded-lg text-xs font-semibold transition-all
                           ${isSelected

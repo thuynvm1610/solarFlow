@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { CreateHotelProvider, useCreateHotel } from '../../../contexts/CreateHotelContext'
 import { createHotel, getFormOptions } from '../../../services/hotelService'
+import { useToast } from '../../../contexts/ToastContext'
 import Step1BasicInfo from './steps/Step1BasicInfo'
 import Step2Amenities from './steps/Step2Amenities'
 import Step3CreateRoomTypes from './steps/Step3CreateRoomTypes'
@@ -23,13 +24,18 @@ export default function CreateHotelModal({ onClose, onSuccess }) {
   const [formOptions, setFormOptions] = useState(null)
   const [loadingOptions, setLoadingOptions] = useState(true)
   const [error, setError] = useState(null)
+  const toast = useToast()
 
   useEffect(() => {
     getFormOptions()
       .then(res => setFormOptions(res.data))
-      .catch(err => setError(err.response?.data?.message || err.message || 'Không thể tải dữ liệu form'))
+      .catch(err => {
+        const errorMsg = err.response?.data?.message || err.message || 'Không thể tải dữ liệu form'
+        setError(errorMsg)
+        toast.error(errorMsg)
+      })
       .finally(() => setLoadingOptions(false))
-  }, [])
+  }, [toast])
 
   if (error) {
     return (
@@ -70,12 +76,13 @@ export default function CreateHotelModal({ onClose, onSuccess }) {
 function CreateHotelForm({ formOptions, onClose, onSuccess }) {
   const { state, dispatch, buildSubmitPayload, validatePayload } = useCreateHotel()
   const [submitting, setSubmitting] = useState(false)
+  const toast = useToast()
 
   const currentStep = state.currentStep
   const isLastStep = currentStep === STEPS.length
 
   const validateCurrentStep = () => {
-    const { basicInfo, amenities} = state
+    const { basicInfo, amenities } = state
     const errors = []
 
     switch (currentStep) {
@@ -92,9 +99,9 @@ function CreateHotelForm({ formOptions, onClose, onSuccess }) {
         if (!basicInfo.checkOutTime) errors.push('Chưa nhập giờ check-out')
         break
       case 2:
-        amenities.paidAmenities.forEach((pa, idx) => {
-          if (!pa.basePrice || Number(pa.basePrice) <= 0) errors.push(`Dịch vụ thứ ${idx + 1} chưa nhập giá`)
-          if (!pa.unitId) errors.push(`Dịch vụ thứ ${idx + 1} chưa chọn đơn vị`)
+        amenities.paidAmenities.forEach((pa) => {
+          if (!pa.basePrice || Number(pa.basePrice) <= 0) errors.push(`Dịch vụ "${pa.name}" chưa nhập giá`)
+          if (!pa.unitId) errors.push(`Dịch vụ "${pa.name}" chưa chọn đơn vị`)
         })
         break
       case 3:
@@ -127,7 +134,7 @@ function CreateHotelForm({ formOptions, onClose, onSuccess }) {
   const handleNext = () => {
     const errors = validateCurrentStep()
     if (errors.length > 0) {
-      alert('Vui lòng hoàn thành các trường bắt buộc:\n\n' + errors.join('\n'))
+      errors.forEach(error => toast.error(error, 4000))
       return
     }
     dispatch({ type: 'SET_STEP', payload: currentStep + 1 })
@@ -138,17 +145,19 @@ function CreateHotelForm({ formOptions, onClose, onSuccess }) {
   const handleSubmit = async () => {
     const errors = validatePayload()
     if (errors.length) {
-      alert('Lỗi:\n\n' + errors.join('\n'))
+      errors.forEach(error => toast.error(error, 5000))
       return
     }
+
     setSubmitting(true)
     try {
       await createHotel(buildSubmitPayload())
+      toast.success('Tạo khách sạn thành công!', 3000)
       dispatch({ type: 'RESET' })
       onSuccess?.()
       onClose()
     } catch (err) {
-      alert(err.response?.data?.message ?? 'Có lỗi xảy ra khi tạo khách sạn')
+      toast.error(err.response?.data?.message ?? 'Có lỗi xảy ra khi tạo khách sạn', 5000)
     } finally {
       setSubmitting(false)
     }
