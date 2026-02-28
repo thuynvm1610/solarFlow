@@ -15,7 +15,7 @@ DB_CONFIG = {
 # ==================== DATA CONFIGURATION ====================
 
 START_DATE = datetime(2024, 1, 1)
-END_DATE = datetime(2026, 2, 16)
+END_DATE = datetime(2026, 2, 28)
 
 CUSTOMER_IDS = list(range(13, 1017))  # 13 to 1016
 HOTEL_IDS = list(range(1, 11))  # 1 to 10
