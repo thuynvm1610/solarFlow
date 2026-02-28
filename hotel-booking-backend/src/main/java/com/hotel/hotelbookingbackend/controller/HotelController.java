@@ -51,7 +51,7 @@ public class HotelController {
     }
 
     // ═══════════════════════════════════════════════════════════
-    // CREATE, EDIT, DELETE
+    // CREATE, EDIT
     // ═══════════════════════════════════════════════════════════
 
     /**
@@ -92,6 +92,7 @@ public class HotelController {
             Hotel hotel = hotelService.createHotel(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(hotel);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -118,9 +119,10 @@ public class HotelController {
         }
     }
 
-    /**
-     * Delete hotel
-     */
+    // ═══════════════════════════════════════════════════════════
+    // DELETE
+    // ═══════════════════════════════════════════════════════════
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteHotel(@PathVariable Long id) {
         try {

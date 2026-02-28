@@ -97,6 +97,8 @@ function CreateHotelForm({ formOptions, onClose, onSuccess }) {
         if (!basicInfo.managerId) errors.push('Chưa chọn quản lý')
         if (!basicInfo.checkInTime) errors.push('Chưa nhập giờ check-in')
         if (!basicInfo.checkOutTime) errors.push('Chưa nhập giờ check-out')
+        if (basicInfo.checkInTime && basicInfo.checkOutTime && basicInfo.checkInTime === basicInfo.checkOutTime)
+          errors.push('Giờ check-in và giờ check-out không được trùng nhau')
         break
       case 2:
         amenities.paidAmenities.forEach((pa) => {

@@ -12,31 +12,31 @@ USE hotel;
    USERS
    ========================= */
 CREATE TABLE users (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    email VARCHAR(255) NOT NULL UNIQUE,
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `email` VARCHAR(255) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
-    full_name VARCHAR(255) NOT NULL,
-    gender ENUM('MALE','FEMALE'),
-    dob DATE,
-    city VARCHAR(50),
-    phone VARCHAR(12),
+    `full_name` VARCHAR(255) NOT NULL,
+    `gender` ENUM('MALE','FEMALE'),
+    `dob` DATE,
+    `city` VARCHAR(50),
+    `phone` VARCHAR(12),
     `role` ENUM('ADMIN', 'HOTEL_MANAGER', 'CUSTOMER') NOT NULL,
-    image_url VARCHAR(500) NOT NULL,
-    `status` VARCHAR(20) DEFAULT 'ACTIVE',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    `image_url` VARCHAR(500),
+    `status` ENUM('ACTIVE', 'BANNED') DEFAULT 'ACTIVE' NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO users (email, password, full_name, gender, dob, city, phone, role, image_url) VALUES
+INSERT INTO users (`email`, `password`, `full_name`, `gender`, `dob`, `city`, `phone`, `role`, `image_url`) VALUES
 -- ADMIN
-('thuynvm1610@gmail.com', '$2a$10$7EqJtq98hPqEX7fNZaFWoOhi5Q6nK0lE8Xc3k5YwJ3kZrZKz3yXbG',
+('thuynvm1610@gmail.com', '$2a$10$IurVkMn06jKaUJIwb8oY4uHekHFRAFO2tfyXlz7Bdok.MCMC3bK3q',
  'Nguyễn Văn Minh Thủy', 'MALE', '2004-10-16', 'Hải Phòng', '0375577856', 'ADMIN', 'admin_1'),
  
-('linhlt2910@gmail.com', '$2a$10$7EqJtq98hPqEX7fNZaFWoOhi5Q6nK0lE8Xc3k5YwJ3kZrZKz3yXbG',
+('linhlt2910@gmail.com', '$2a$10$IurVkMn06jKaUJIwb8oY4uHekHFRAFO2tfyXlz7Bdok.MCMC3bK3q',
  'Lê Thùy Linh', 'FEMALE', '2003-10-29', 'Hàỉ Phòng', '0345914403', 'ADMIN', 'admin_2'),
  
 -- HOTEL_MANAGER
-('quanlm1207@gmail.com', '$2a$10$7EqJtq98hPqEX7fNZaFWoOhi5Q6nK0lE8Xc3k5YwJ3kZrZKz3yXbG',
+('quanlm1207@gmail.com', '$2a$10$IurVkMn06jKaUJIwb8oY4uHekHFRAFO2tfyXlz7Bdok.MCMC3bK3q',
  'Lê Minh Quân','MALE','1995-07-12','Đà Nẵng','0901122334','HOTEL_MANAGER', 'staff_1'),
 
 ('phuongpt0909@gmail.com','$2a$10$7EqJtq98hPqEX7fNZaFWoOhi5Q6nK0lE8Xc3k5YwJ3kZrZKz3yXbG',
@@ -66,8 +66,11 @@ INSERT INTO users (email, password, full_name, gender, dob, city, phone, role, i
 ('phuctm0102@gmail.com','$2a$10$7EqJtq98hPqEX7fNZaFWoOhi5Q6nK0lE8Xc3k5YwJ3kZrZKz3yXbG',
  'Trịnh Minh Phúc','MALE','1993-02-01','Hồ Chí Minh','0913344556','HOTEL_MANAGER', 'staff_10'),
  
+ ('dangth1108@gmail.com','$2a$10$7EqJtq98hPqEX7fNZaFWoOhi5Q6nK0lE8Xc3k5YwJ3kZrZKz3yXbG',
+ 'Trần Hải Đăng','MALE','1995-08-11','Nam Định','0813354586','HOTEL_MANAGER', 'staff_11'),
+ 
 -- CUSTOMER
-('hoantt2505@gmail.com', '$2a$10$7EqJtq98hPqEX7fNZaFWoOhi5Q6nK0lE8Xc3k5YwJ3kZrZKz3yXbG',
+('hoantt2505@gmail.com', '$2a$10$IurVkMn06jKaUJIwb8oY4uHekHFRAFO2tfyXlz7Bdok.MCMC3bK3q',
  'Nguyễn Thị Hoa','FEMALE','2000-05-25','Hà Nội','0931122334','CUSTOMER', 'customer_1'),
 
 ('khoatm1707@gmail.com', '$2a$10$7EqJtq98hPqEX7fNZaFWoOhi5Q6nK0lE8Xc3k5YwJ3kZrZKz3yXbG',
@@ -1120,30 +1123,29 @@ INSERT INTO users (email, password, full_name, gender, dob, city, phone, role, i
    HOTELS
    ========================= */
 CREATE TABLE hotels (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(255) NOT NULL,
-    floor INT,
+    `floor` INT NOT NULL,
     `description` TEXT,
     `type` ENUM('HOTEL', 'HOMESTAY', 'RESORT'),
-    address VARCHAR(500) NOT NULL,
-    city VARCHAR(30) NOT NULL,
-    star_rating INT,
-    review_rating DECIMAL(3,1),
-    check_in_time TIME,
-    check_out_time TIME,
-    check_in_instructions TEXT,
-    policy_text TEXT,
-    `status` VARCHAR(20) DEFAULT 'ACTIVE',
-    manager_id BIGINT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `address` VARCHAR(500) NOT NULL,
+    `city` VARCHAR(30) NOT NULL,
+    `star_rating` INT,
+    `review_rating` DECIMAL(3,1),
+    `check_in_time` TIME NOT NULL,
+    `check_out_time` TIME NOT NULL,
+    `check_in_instructions` TEXT,
+    `policy_text` TEXT,
+    `status` ENUM('ACTIVE', 'MAINTENANCE', 'CLOSED', 'PENDING_REVIEW') DEFAULT 'ACTIVE' NOT NULL ,
+    `manager_id` BIGINT NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_hotel_manager
-        FOREIGN KEY (manager_id) REFERENCES users(id)
+        FOREIGN KEY (`manager_id`) REFERENCES users(`id`)
 );
 
 INSERT INTO hotels 
-(`name`, floor, `description`, `type`, address, city, star_rating, review_rating, check_in_time, check_out_time, check_in_instructions,
-policy_text, manager_id) 
+(`name`, `floor`, `description`, `type`, `address`, `city`, `star_rating`, `review_rating`, `check_in_time`, `check_out_time`, `check_in_instructions`, `policy_text`, `manager_id`) 
 VALUES
 (
 	-- name
@@ -1549,7 +1551,7 @@ VALUES
     -- star_rating
     3,
     -- review_rating
-    NULL,
+    8,
     -- check_in_time
     '14:00',
     -- check_out_time
@@ -1621,28 +1623,26 @@ VALUES
    IMAGES
    ========================= */
 CREATE TABLE images (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    owner_type ENUM('HOTEL', 'ROOM_TYPE') NOT NULL,
-    owner_id BIGINT NOT NULL,
-    image_url VARCHAR(500) NOT NULL,
-    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `owner_type` ENUM('HOTEL', 'ROOM_TYPE') NOT NULL,
+    `owner_id` BIGINT NOT NULL,
+    `image_url` VARCHAR(500) NOT NULL,
+    `is_primary` BOOLEAN DEFAULT FALSE NOT NULL,
 
-    -- Generated column dùng để enforce unique primary image
-    primary_owner_id BIGINT
+    `primary_owner_id` BIGINT
         GENERATED ALWAYS AS (
             CASE
-                WHEN is_primary = TRUE THEN owner_id
+                WHEN `is_primary` = TRUE THEN `owner_id`
                 ELSE NULL
             END
         ) STORED,
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    -- Unique: mỗi owner_type + owner_id chỉ có 1 primary image
-    UNIQUE KEY ux_primary_image (owner_type, primary_owner_id)
+    UNIQUE KEY ux_primary_image (`owner_type`, `primary_owner_id`)
 );
 
-INSERT INTO images (owner_type, owner_id, image_url, is_primary) VALUES
+INSERT INTO images (`owner_type`, `owner_id`, `image_url`, `is_primary`) VALUES
 -- Hotel 1
 ('HOTEL',1,'hotel1_1',TRUE),
 ('HOTEL',1,'hotel1_2',FALSE),
@@ -1830,21 +1830,21 @@ INSERT INTO images (owner_type, owner_id, image_url, is_primary) VALUES
    ROOM TYPES
    ========================= */
 CREATE TABLE room_types (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    hotel_id BIGINT NOT NULL,
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `hotel_id` BIGINT NOT NULL,
     `name` VARCHAR(100) NOT NULL,
     `description` TEXT,
-    max_adults INT NOT NULL,
-    max_children INT DEFAULT 0,
-    base_price DECIMAL(12,2) NOT NULL,
-    area_m2 INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `max_adults` INT NOT NULL,
+    `max_children` INT DEFAULT 0 NOT NULL,
+    `base_price` DECIMAL(12,2) NOT NULL,
+    `area_m2` INT NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_room_type_hotel
-        FOREIGN KEY (hotel_id) REFERENCES hotels(id)
+        FOREIGN KEY (`hotel_id`) REFERENCES hotels(`id`)
 );
 
-INSERT INTO room_types (hotel_id, name, description, max_adults, max_children, base_price, area_m2) VALUES
+INSERT INTO room_types (`hotel_id`, `name`, `description`, `max_adults`, `max_children`, `base_price`, `area_m2`) VALUES
 -- Hotel 1 (1-4)
 (1,'Standard','Phòng tiêu chuẩn, đầy đủ tiện nghi cơ bản. Phòng không có cửa sổ.',2,1,362572,18),
 (1,'Superior','Phòng nâng cấp với không gian rộng hơn.',2,1,387000,20),
@@ -1916,201 +1916,329 @@ Vé vào Vườn quốc gia Ba Vì',
    ROOMS (physical rooms)
    ========================= */
 CREATE TABLE rooms (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    hotel_id BIGINT NOT NULL,
-    room_type_id BIGINT NOT NULL,
-    room_number VARCHAR(20),
-    floor INT,
-    `status` VARCHAR(30) DEFAULT 'AVAILABLE',
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `hotel_id` BIGINT NOT NULL,
+    `room_type_id` BIGINT NOT NULL,
+    `room_number` VARCHAR(20) NOT NULL,
+    `floor` INT,
+    `status` ENUM('AVAILABLE','OCCUPIED', 'MAINTENANCE') DEFAULT 'AVAILABLE' NOT NULL,
     CONSTRAINT fk_room_hotel
-        FOREIGN KEY (hotel_id) REFERENCES hotels(id),
+        FOREIGN KEY (`hotel_id`) REFERENCES hotels(`id`),
     CONSTRAINT fk_room_type
-        FOREIGN KEY (room_type_id) REFERENCES room_types(id)
+        FOREIGN KEY (`room_type_id`) REFERENCES room_types(`id`)
 );
 
-INSERT INTO rooms (hotel_id, room_type_id, room_number, floor) VALUES
+INSERT INTO rooms (`hotel_id`, `room_type_id`, `room_number`, `floor`, `status`) VALUES
 /* ================= HOTEL 1 (7 tầng) ================= */
 /* Types: 1-4 */
-(1,1,'101',1),(1,1,'102',1),(1,1,'201',2),(1,1,'202',2),
-(1,1,'301',3),(1,1,'302',3),(1,1,'401',4),(1,1,'402',4),
-(1,1,'501',5),(1,1,'502',5),(1,1,'601',6),(1,1,'602',6),
-(1,1,'701',7),(1,1,'702',7),
+(1,1,'101',1,'AVAILABLE'),   -- id=1
+(1,1,'102',1,'OCCUPIED'),    -- id=2  ← BK-00105
+(1,1,'201',2,'OCCUPIED'),    -- id=3  ← BK-00101
+(1,1,'202',2,'AVAILABLE'),   -- id=4
+(1,1,'301',3,'AVAILABLE'),   -- id=5
+(1,1,'302',3,'AVAILABLE'),   -- id=6
+(1,1,'401',4,'OCCUPIED'),    -- id=7  ← BK-00101
+(1,1,'402',4,'AVAILABLE'),   -- id=8
+(1,1,'501',5,'AVAILABLE'),   -- id=9
+(1,1,'502',5,'AVAILABLE'),   -- id=10
+(1,1,'601',6,'AVAILABLE'),   -- id=11
+(1,1,'602',6,'OCCUPIED'),    -- id=12 ← BK-00102
+(1,1,'701',7,'AVAILABLE'),   -- id=13
+(1,1,'702',7,'MAINTENANCE'), -- id=14 ← MAINTENANCE #1
 
-(1,2,'103',1),(1,2,'203',2),(1,2,'303',3),(1,2,'403',4),
-(1,2,'503',5),(1,2,'603',6),(1,2,'703',7),
+(1,2,'103',1,'OCCUPIED'),    -- id=15 ← BK-00105
+(1,2,'203',2,'AVAILABLE'),   -- id=16
+(1,2,'303',3,'AVAILABLE'),   -- id=17
+(1,2,'403',4,'AVAILABLE'),   -- id=18
+(1,2,'503',5,'AVAILABLE'),   -- id=19
+(1,2,'603',6,'AVAILABLE'),   -- id=20
+(1,2,'703',7,'AVAILABLE'),   -- id=21
 
-(1,3,'104',1),(1,3,'204',2),(1,3,'304',3),
-(1,3,'404',4),(1,3,'504',5),(1,3,'604',6),
+(1,3,'104',1,'OCCUPIED'),    -- id=22 ← BK-00105
+(1,3,'204',2,'AVAILABLE'),   -- id=23
+(1,3,'304',3,'AVAILABLE'),   -- id=24
+(1,3,'404',4,'AVAILABLE'),   -- id=25
+(1,3,'504',5,'AVAILABLE'),   -- id=26
+(1,3,'604',6,'AVAILABLE'),   -- id=27
 
-(1,4,'105',1),(1,4,'205',2),(1,4,'305',3),(1,4,'405',4),
-
+(1,4,'105',1,'AVAILABLE'),   -- id=28
+(1,4,'205',2,'AVAILABLE'),   -- id=29
+(1,4,'305',3,'AVAILABLE'),   -- id=30
+(1,4,'405',4,'MAINTENANCE'), -- id=31 ← MAINTENANCE #2
 
 /* ================= HOTEL 2 (10 tầng) ================= */
 /* Types: 5-6 */
-(2,5,'101',1),(2,5,'201',2),(2,5,'301',3),(2,5,'401',4),
-(2,5,'501',5),(2,5,'601',6),(2,5,'701',7),(2,5,'801',8),
-(2,5,'901',9),(2,5,'1001',10),
-(2,5,'102',1),(2,5,'202',2),(2,5,'302',3),(2,5,'402',4),
-(2,5,'502',5),(2,5,'602',6),(2,5,'702',7),(2,5,'802',8),
-(2,5,'902',9),(2,5,'1002',10),
+(2,5,'101',1,'AVAILABLE'),   -- id=32
+(2,5,'201',2,'AVAILABLE'),   -- id=33
+(2,5,'301',3,'AVAILABLE'),   -- id=34
+(2,5,'401',4,'OCCUPIED'),    -- id=35 ← BK-00103
+(2,5,'501',5,'AVAILABLE'),   -- id=36
+(2,5,'601',6,'AVAILABLE'),   -- id=37
+(2,5,'701',7,'AVAILABLE'),   -- id=38
+(2,5,'801',8,'AVAILABLE'),   -- id=39
+(2,5,'901',9,'AVAILABLE'),   -- id=40
+(2,5,'1001',10,'OCCUPIED'),  -- id=41 ← BK-00103
+(2,5,'102',1,'AVAILABLE'),   -- id=42
+(2,5,'202',2,'AVAILABLE'),   -- id=43
+(2,5,'302',3,'OCCUPIED'),    -- id=44 ← BK-00104
+(2,5,'402',4,'AVAILABLE'),   -- id=45
+(2,5,'502',5,'AVAILABLE'),   -- id=46
+(2,5,'602',6,'AVAILABLE'),   -- id=47
+(2,5,'702',7,'MAINTENANCE'), -- id=48 ← MAINTENANCE #3
+(2,5,'802',8,'AVAILABLE'),   -- id=49
+(2,5,'902',9,'OCCUPIED'),    -- id=50 ← BK-00104
+(2,5,'1002',10,'AVAILABLE'), -- id=51
 
-(2,6,'103',1),(2,6,'203',2),(2,6,'303',3),(2,6,'403',4),
-(2,6,'503',5),(2,6,'603',6),(2,6,'703',7),(2,6,'803',8),
-(2,6,'903',9),(2,6,'1003',10),
-
+(2,6,'103',1,'AVAILABLE'),   -- id=52
+(2,6,'203',2,'AVAILABLE'),   -- id=53
+(2,6,'303',3,'AVAILABLE'),   -- id=54
+(2,6,'403',4,'AVAILABLE'),   -- id=55
+(2,6,'503',5,'AVAILABLE'),   -- id=56
+(2,6,'603',6,'AVAILABLE'),   -- id=57
+(2,6,'703',7,'AVAILABLE'),   -- id=58
+(2,6,'803',8,'AVAILABLE'),   -- id=59
+(2,6,'903',9,'AVAILABLE'),   -- id=60
+(2,6,'1003',10,'MAINTENANCE'),-- id=61 ← MAINTENANCE #4
 
 /* ================= HOTEL 3 (7 tầng) ================= */
 /* Types: 7-8 */
-(3,7,'101',1),(3,7,'201',2),(3,7,'301',3),(3,7,'401',4),
-(3,7,'501',5),(3,7,'601',6),(3,7,'701',7),
+(3,7,'101',1,'AVAILABLE'),   -- id=62
+(3,7,'201',2,'AVAILABLE'),   -- id=63
+(3,7,'301',3,'AVAILABLE'),   -- id=64
+(3,7,'401',4,'AVAILABLE'),   -- id=65
+(3,7,'501',5,'AVAILABLE'),   -- id=66
+(3,7,'601',6,'AVAILABLE'),   -- id=67
+(3,7,'701',7,'AVAILABLE'),   -- id=68
 
-(3,8,'102',1),(3,8,'202',2),(3,8,'302',3),(3,8,'402',4),
-(3,8,'502',5),(3,8,'602',6),
-
+(3,8,'102',1,'AVAILABLE'),   -- id=69
+(3,8,'202',2,'AVAILABLE'),   -- id=70
+(3,8,'302',3,'AVAILABLE'),   -- id=71
+(3,8,'402',4,'AVAILABLE'),   -- id=72
+(3,8,'502',5,'AVAILABLE'),   -- id=73
+(3,8,'602',6,'AVAILABLE'),   -- id=74
 
 /* ================= HOTEL 4 (5 tầng) ================= */
 /* Types: 9-13 */
-(4,9,'101',1),(4,9,'102',1),(4,9,'201',2),(4,9,'202',2),
-(4,9,'301',3),(4,9,'302',3),(4,9,'401',4),(4,9,'402',4),
+(4,9,'101',1,'AVAILABLE'),   -- id=75
+(4,9,'102',1,'AVAILABLE'),   -- id=76
+(4,9,'201',2,'AVAILABLE'),   -- id=77
+(4,9,'202',2,'AVAILABLE'),   -- id=78
+(4,9,'301',3,'AVAILABLE'),   -- id=79
+(4,9,'302',3,'AVAILABLE'),   -- id=80
+(4,9,'401',4,'AVAILABLE'),   -- id=81
+(4,9,'402',4,'AVAILABLE'),   -- id=82
 
-(4,10,'103',1),(4,10,'203',2),(4,10,'303',3),(4,10,'403',4),
-(4,10,'503',5),
+(4,10,'103',1,'AVAILABLE'),  -- id=83
+(4,10,'203',2,'AVAILABLE'),  -- id=84
+(4,10,'303',3,'AVAILABLE'),  -- id=85
+(4,10,'403',4,'AVAILABLE'),  -- id=86
+(4,10,'503',5,'AVAILABLE'),  -- id=87
 
-(4,11,'104',1),(4,11,'204',2),(4,11,'304',3),(4,11,'404',4),
+(4,11,'104',1,'AVAILABLE'),  -- id=88
+(4,11,'204',2,'AVAILABLE'),  -- id=89
+(4,11,'304',3,'AVAILABLE'),  -- id=90
+(4,11,'404',4,'AVAILABLE'),  -- id=91
 
-(4,12,'105',1),(4,12,'205',2),(4,12,'305',3),
+(4,12,'105',1,'AVAILABLE'),  -- id=92
+(4,12,'205',2,'AVAILABLE'),  -- id=93
+(4,12,'305',3,'AVAILABLE'),  -- id=94
 
-(4,13,'106',1),(4,13,'206',2),(4,13,'306',3),
-
+(4,13,'106',1,'AVAILABLE'),  -- id=95
+(4,13,'206',2,'AVAILABLE'),  -- id=96
+(4,13,'306',3,'AVAILABLE'),  -- id=97
 
 /* ================= HOTEL 5 (8 tầng) ================= */
 /* Types: 14-16 */
-(5,14,'101',1),(5,14,'201',2),(5,14,'301',3),(5,14,'401',4),
-(5,14,'501',5),(5,14,'601',6),(5,14,'701',7),(5,14,'801',8),
+(5,14,'101',1,'AVAILABLE'),  -- id=98
+(5,14,'201',2,'AVAILABLE'),  -- id=99
+(5,14,'301',3,'AVAILABLE'),  -- id=100
+(5,14,'401',4,'AVAILABLE'),  -- id=101
+(5,14,'501',5,'AVAILABLE'),  -- id=102
+(5,14,'601',6,'AVAILABLE'),  -- id=103
+(5,14,'701',7,'AVAILABLE'),  -- id=104
+(5,14,'801',8,'AVAILABLE'),  -- id=105
 
-(5,15,'102',1),(5,15,'202',2),(5,15,'302',3),(5,15,'402',4),
-(5,15,'502',5),(5,15,'602',6),
+(5,15,'102',1,'AVAILABLE'),  -- id=106
+(5,15,'202',2,'AVAILABLE'),  -- id=107
+(5,15,'302',3,'AVAILABLE'),  -- id=108
+(5,15,'402',4,'AVAILABLE'),  -- id=109
+(5,15,'502',5,'AVAILABLE'),  -- id=110
+(5,15,'602',6,'AVAILABLE'),  -- id=111
 
-(5,16,'103',1),(5,16,'203',2),(5,16,'303',3),(5,16,'403',4),
-
+(5,16,'103',1,'AVAILABLE'),  -- id=112
+(5,16,'203',2,'AVAILABLE'),  -- id=113
+(5,16,'303',3,'AVAILABLE'),  -- id=114
+(5,16,'403',4,'AVAILABLE'),  -- id=115
 
 /* ================= HOTEL 6 (2 tầng) ================= */
 /* Types: 17-18 */
-(6,17,'101',1),(6,17,'102',1),(6,17,'103',1),(6,17,'104',1),
-(6,17,'201',2),(6,17,'202',2),(6,17,'203',2),(6,17,'204',2),
+(6,17,'101',1,'AVAILABLE'),  -- id=116
+(6,17,'102',1,'AVAILABLE'),  -- id=117
+(6,17,'103',1,'AVAILABLE'),  -- id=118
+(6,17,'104',1,'AVAILABLE'),  -- id=119
+(6,17,'201',2,'AVAILABLE'),  -- id=120
+(6,17,'202',2,'AVAILABLE'),  -- id=121
+(6,17,'203',2,'AVAILABLE'),  -- id=122
+(6,17,'204',2,'AVAILABLE'),  -- id=123
 
-(6,18,'105',1),(6,18,'205',2),(6,18,'106',1),(6,18,'206',2),
-
+(6,18,'105',1,'AVAILABLE'),  -- id=124
+(6,18,'205',2,'AVAILABLE'),  -- id=125
+(6,18,'106',1,'AVAILABLE'),  -- id=126
+(6,18,'206',2,'AVAILABLE'),  -- id=127
 
 /* ================= HOTEL 7 (19 tầng) ================= */
 /* Types: 19-22 */
-(7,19,'101',1),(7,19,'201',2),(7,19,'301',3),(7,19,'401',4),
-(7,19,'501',5),(7,19,'601',6),(7,19,'701',7),(7,19,'801',8),
-(7,19,'901',9),(7,19,'1001',10),(7,19,'1101',11),
-(7,19,'1201',12),(7,19,'1301',13),(7,19,'1401',14),
-(7,19,'1501',15),
+(7,19,'101',1,'AVAILABLE'),  -- id=128
+(7,19,'201',2,'AVAILABLE'),  -- id=129
+(7,19,'301',3,'AVAILABLE'),  -- id=130
+(7,19,'401',4,'AVAILABLE'),  -- id=131
+(7,19,'501',5,'AVAILABLE'),  -- id=132
+(7,19,'601',6,'AVAILABLE'),  -- id=133
+(7,19,'701',7,'AVAILABLE'),  -- id=134
+(7,19,'801',8,'AVAILABLE'),  -- id=135
+(7,19,'901',9,'AVAILABLE'),  -- id=136
+(7,19,'1001',10,'AVAILABLE'),-- id=137
+(7,19,'1101',11,'AVAILABLE'),-- id=138
+(7,19,'1201',12,'AVAILABLE'),-- id=139
+(7,19,'1301',13,'AVAILABLE'),-- id=140
+(7,19,'1401',14,'AVAILABLE'),-- id=141
+(7,19,'1501',15,'AVAILABLE'),-- id=142
 
-(7,20,'102',1),(7,20,'202',2),(7,20,'302',3),(7,20,'402',4),
-(7,20,'502',5),(7,20,'602',6),(7,20,'702',7),(7,20,'802',8),
+(7,20,'102',1,'AVAILABLE'),  -- id=143
+(7,20,'202',2,'AVAILABLE'),  -- id=144
+(7,20,'302',3,'AVAILABLE'),  -- id=145
+(7,20,'402',4,'AVAILABLE'),  -- id=146
+(7,20,'502',5,'AVAILABLE'),  -- id=147
+(7,20,'602',6,'AVAILABLE'),  -- id=148
+(7,20,'702',7,'AVAILABLE'),  -- id=149
+(7,20,'802',8,'AVAILABLE'),  -- id=150
 
-(7,21,'103',1),(7,21,'203',2),(7,21,'303',3),(7,21,'403',4),
+(7,21,'103',1,'AVAILABLE'),  -- id=151
+(7,21,'203',2,'AVAILABLE'),  -- id=152
+(7,21,'303',3,'AVAILABLE'),  -- id=153
+(7,21,'403',4,'AVAILABLE'),  -- id=154
 
-(7,22,'104',1),(7,22,'204',2),(7,22,'304',3),(7,22,'404',4),
-
+(7,22,'104',1,'AVAILABLE'),  -- id=155
+(7,22,'204',2,'AVAILABLE'),  -- id=156
+(7,22,'304',3,'AVAILABLE'),  -- id=157
+(7,22,'404',4,'AVAILABLE'),  -- id=158
 
 /* ================= HOTEL 8 (4 tầng) ================= */
 /* Types: 23-27 */
-(8,23,'101',1),(8,23,'201',2),(8,23,'301',3),(8,23,'401',4),
+(8,23,'101',1,'AVAILABLE'),  -- id=159
+(8,23,'201',2,'AVAILABLE'),  -- id=160
+(8,23,'301',3,'AVAILABLE'),  -- id=161
+(8,23,'401',4,'AVAILABLE'),  -- id=162
 
-(8,24,'102',1),(8,24,'202',2),(8,24,'302',3),
+(8,24,'102',1,'AVAILABLE'),  -- id=163
+(8,24,'202',2,'AVAILABLE'),  -- id=164
+(8,24,'302',3,'AVAILABLE'),  -- id=165
 
-(8,25,'103',1),(8,25,'203',2),
+(8,25,'103',1,'AVAILABLE'),  -- id=166
+(8,25,'203',2,'AVAILABLE'),  -- id=167
 
-(8,26,'104',1),(8,26,'204',2),
+(8,26,'104',1,'AVAILABLE'),  -- id=168
+(8,26,'204',2,'AVAILABLE'),  -- id=169
 
-(8,27,'105',1),(8,27,'205',2),
-
+(8,27,'105',1,'AVAILABLE'),  -- id=170
+(8,27,'205',2,'AVAILABLE'),  -- id=171
 
 /* ================= HOTEL 9 (8 tầng) ================= */
 /* Type: 28 */
-(9,28,'101',1),(9,28,'201',2),(9,28,'301',3),(9,28,'401',4),
-(9,28,'501',5),(9,28,'601',6),(9,28,'701',7),(9,28,'801',8),
-
+(9,28,'101',1,'AVAILABLE'),  -- id=172
+(9,28,'201',2,'AVAILABLE'),  -- id=173
+(9,28,'301',3,'AVAILABLE'),  -- id=174
+(9,28,'401',4,'AVAILABLE'),  -- id=175
+(9,28,'501',5,'AVAILABLE'),  -- id=176
+(9,28,'601',6,'AVAILABLE'),  -- id=177
+(9,28,'701',7,'AVAILABLE'),  -- id=178
+(9,28,'801',8,'AVAILABLE'),  -- id=179
 
 /* ================= HOTEL 10 (9 tầng) ================= */
 /* Types: 29-31 */
-(10,29,'101',1),(10,29,'201',2),(10,29,'301',3),(10,29,'401',4),
-(10,29,'501',5),(10,29,'601',6),(10,29,'701',7),(10,29,'801',8),
+(10,29,'101',1,'AVAILABLE'), -- id=180
+(10,29,'201',2,'AVAILABLE'), -- id=181
+(10,29,'301',3,'AVAILABLE'), -- id=182
+(10,29,'401',4,'AVAILABLE'), -- id=183
+(10,29,'501',5,'AVAILABLE'), -- id=184
+(10,29,'601',6,'AVAILABLE'), -- id=185
+(10,29,'701',7,'AVAILABLE'), -- id=186
+(10,29,'801',8,'AVAILABLE'), -- id=187
 
-(10,30,'102',1),(10,30,'202',2),(10,30,'302',3),(10,30,'402',4),
+(10,30,'102',1,'AVAILABLE'), -- id=188
+(10,30,'202',2,'AVAILABLE'), -- id=189
+(10,30,'302',3,'AVAILABLE'), -- id=190
+(10,30,'402',4,'AVAILABLE'), -- id=191
 
-(10,31,'103',1),(10,31,'203',2),(10,31,'303',3);
+(10,31,'103',1,'AVAILABLE'), -- id=192
+(10,31,'203',2,'AVAILABLE'), -- id=193
+(10,31,'303',3,'AVAILABLE'); -- id=194
 
 /* =========================
-   AMENITIES (expandable)
+   AMENITIES
    ========================= */
 CREATE TABLE amenities (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
     `code` VARCHAR(50) UNIQUE NOT NULL,
     `name` VARCHAR(255) NOT NULL,
-    icon VARCHAR(100),
-    category ENUM('ROOM_FEATURE', 'FREE_SERVICE', 'EXTRA_SERVICE') NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE
+    `icon` VARCHAR(100),
+    `category` ENUM('ROOM_FEATURE', 'FREE_SERVICE', 'EXTRA_SERVICE') NOT NULL,
+    `is_active` BOOLEAN DEFAULT TRUE NOT NULL
 );
 
-INSERT INTO amenities (`code`, `name`, icon, category, is_active) VALUES
+INSERT INTO amenities (`code`, `name`, `icon`, `category`, `is_active`) VALUES
 /* ================= ROOM FEATURES ================= */
-('BED_SINGLE', 'Giường đơn', 'bed-single.svg', 'ROOM_FEATURE', TRUE),
-('BED_DOUBLE', 'Giường đôi', 'bed-double.svg', 'ROOM_FEATURE', TRUE),
-('BED_KING', 'Giường King Size', 'bed-king.svg', 'ROOM_FEATURE', TRUE),
-('AIR_CONDITIONER', 'Điều hòa', 'air-conditioner.svg', 'ROOM_FEATURE', TRUE),
-('TELEVISION', 'TV màn hình phẳng', 'tv.svg', 'ROOM_FEATURE', TRUE),
-('MINI_BAR', 'Minibar', 'minibar.svg', 'ROOM_FEATURE', TRUE),
-('BALCONY', 'Ban công riêng', 'balcony.svg', 'ROOM_FEATURE', TRUE),
-('SEA_VIEW', 'Hướng biển', 'sea-view.svg', 'ROOM_FEATURE', TRUE),
-('MOUNTAIN_VIEW', 'Hướng núi', 'mountain-view.svg', 'ROOM_FEATURE', TRUE),
-('BATHTUB', 'Bồn tắm', 'bathtub.svg', 'ROOM_FEATURE', TRUE),
-('SHOWER', 'Phòng tắm đứng', 'shower.svg', 'ROOM_FEATURE', TRUE),
-('WORK_DESK', 'Bàn làm việc', 'desk.svg', 'ROOM_FEATURE', TRUE),
-('WARDROBE', 'Tủ quần áo', 'wardrobe.svg', 'ROOM_FEATURE', TRUE),
-('SAFE_BOX', 'Két an toàn', 'safe-box.svg', 'ROOM_FEATURE', TRUE),
-('HAIR_DRYER', 'Máy sấy tóc', 'hair-dryer.svg', 'ROOM_FEATURE', TRUE),
+('BED_SINGLE', 'Giường đơn', 'FaBed', 'ROOM_FEATURE', TRUE),
+('BED_DOUBLE', 'Giường đôi', 'FaBed', 'ROOM_FEATURE', TRUE),
+('BED_KING', 'Giường King Size', 'FaBed', 'ROOM_FEATURE', TRUE),
+('AIR_CONDITIONER', 'Điều hòa', 'FaSnowflake', 'ROOM_FEATURE', TRUE),
+('TELEVISION', 'TV màn hình phẳng', 'FaTv', 'ROOM_FEATURE', TRUE),
+('MINI_BAR', 'Minibar', 'FaGlassMartini', 'ROOM_FEATURE', TRUE),
+('BALCONY', 'Ban công riêng', 'MdBalcony', 'ROOM_FEATURE', TRUE),
+('SEA_VIEW', 'Hướng biển', 'FaWater', 'ROOM_FEATURE', TRUE),
+('MOUNTAIN_VIEW', 'Hướng núi', 'FaMountain', 'ROOM_FEATURE', TRUE),
+('BATHTUB', 'Bồn tắm', 'FaBath', 'ROOM_FEATURE', TRUE),
+('SHOWER', 'Phòng tắm đứng', 'FaShower', 'ROOM_FEATURE', TRUE),
+('WORK_DESK', 'Bàn làm việc', 'FaDesktop', 'ROOM_FEATURE', TRUE),
+('WARDROBE', 'Tủ quần áo', 'FaDoorClosed', 'ROOM_FEATURE', TRUE),
+('SAFE_BOX', 'Két an toàn', 'FaLock', 'ROOM_FEATURE', TRUE),
+('HAIR_DRYER', 'Máy sấy tóc', 'FaWind', 'ROOM_FEATURE', TRUE),
 
 /* ================= FREE SERVICES ================= */
-('FREE_WIFI', 'WiFi miễn phí', 'wifi.svg', 'FREE_SERVICE', TRUE),
-('FREE_PARKING', 'Bãi đỗ xe miễn phí', 'parking.svg', 'FREE_SERVICE', TRUE),
-('FREE_BREAKFAST', 'Bữa sáng miễn phí', 'breakfast.svg', 'FREE_SERVICE', TRUE),
-('SWIMMING_POOL', 'Hồ bơi', 'pool.svg', 'FREE_SERVICE', TRUE),
-('GYM', 'Phòng gym', 'gym.svg', 'FREE_SERVICE', TRUE),
-('RECEPTION_24H', 'Lễ tân 24/7', 'reception.svg', 'FREE_SERVICE', TRUE),
-('DAILY_HOUSEKEEPING', 'Dọn phòng hằng ngày', 'housekeeping.svg', 'FREE_SERVICE', TRUE),
-('LUGGAGE_STORAGE', 'Giữ hành lý', 'luggage.svg', 'FREE_SERVICE', TRUE),
-('ELEVATOR', 'Thang máy', 'elevator.svg', 'FREE_SERVICE', TRUE),
-('AIRPORT_SHUTTLE_FREE', 'Đưa đón sân bay miễn phí', 'airport-shuttle.svg', 'FREE_SERVICE', TRUE),
+('FREE_WIFI', 'WiFi miễn phí', 'FaWifi', 'FREE_SERVICE', TRUE),
+('FREE_PARKING', 'Bãi đỗ xe miễn phí', 'FaParking', 'FREE_SERVICE', TRUE),
+('FREE_BREAKFAST', 'Bữa sáng miễn phí', 'FaCoffee', 'FREE_SERVICE', TRUE),
+('SWIMMING_POOL', 'Hồ bơi', 'FaSwimmingPool', 'FREE_SERVICE', TRUE),
+('GYM', 'Phòng gym', 'FaDumbbell', 'FREE_SERVICE', TRUE),
+('RECEPTION_24H', 'Lễ tân 24/7', 'FaConciergeBell', 'FREE_SERVICE', TRUE),
+('DAILY_HOUSEKEEPING', 'Dọn phòng hằng ngày', 'FaBroom', 'FREE_SERVICE', TRUE),
+('LUGGAGE_STORAGE', 'Giữ hành lý', 'FaSuitcase', 'FREE_SERVICE', TRUE),
+('ELEVATOR', 'Thang máy', 'MdElevator', 'FREE_SERVICE', TRUE),
+('AIRPORT_SHUTTLE_FREE', 'Đưa đón sân bay miễn phí', 'FaShuttleVan', 'FREE_SERVICE', TRUE),
 
 /* ================= EXTRA SERVICES ================= */
-('EXTRA_BREAKFAST', 'Thêm suất ăn sáng', 'extra-breakfast.svg', 'EXTRA_SERVICE', TRUE),
-('SPA_SERVICE', 'Dịch vụ spa', 'spa.svg', 'EXTRA_SERVICE', TRUE),
-('LAUNDRY_SERVICE', 'Giặt ủi', 'laundry.svg', 'EXTRA_SERVICE', TRUE),
-('AIRPORT_SHUTTLE_PAID', 'Đưa đón sân bay (tính phí)', 'airport-shuttle-paid.svg', 'EXTRA_SERVICE', TRUE),
-('CAR_RENTAL', 'Thuê xe', 'car-rental.svg', 'EXTRA_SERVICE', TRUE),
-('BABY_COT', 'Nôi em bé', 'baby-cot.svg', 'EXTRA_SERVICE', TRUE),
-('EXTRA_BED', 'Giường phụ', 'extra-bed.svg', 'EXTRA_SERVICE', TRUE),
-('GOLF_SERVICE', 'Chơi golf', 'golf.svg', 'EXTRA_SERVICE', TRUE),
-('PRIVATE_DINNER', 'Tiệc tối riêng', 'private-dinner.svg', 'EXTRA_SERVICE', TRUE),
-('ROOM_DECORATION', 'Trang trí phòng', 'room-decoration.svg', 'EXTRA_SERVICE', TRUE);
+('EXTRA_BREAKFAST', 'Thêm suất ăn sáng', 'FaUtensils', 'EXTRA_SERVICE', TRUE),
+('SPA_SERVICE', 'Dịch vụ spa', 'FaSpa', 'EXTRA_SERVICE', TRUE),
+('LAUNDRY_SERVICE', 'Giặt ủi', 'MdLocalLaundryService', 'EXTRA_SERVICE', TRUE),
+('AIRPORT_SHUTTLE_PAID', 'Đưa đón sân bay tính phí', 'FaShuttleVan', 'EXTRA_SERVICE', TRUE),
+('CAR_RENTAL', 'Thuê xe', 'FaCar', 'EXTRA_SERVICE', TRUE),
+('BABY_COT', 'Nôi em bé', 'FaBaby', 'EXTRA_SERVICE', TRUE),
+('EXTRA_BED', 'Giường phụ', 'FaBed', 'EXTRA_SERVICE', TRUE),
+('GOLF_SERVICE', 'Chơi golf', 'FaGolfBall', 'EXTRA_SERVICE', TRUE),
+('PRIVATE_DINNER', 'Tiệc tối riêng', 'FaUtensilSpoon', 'EXTRA_SERVICE', TRUE),
+('ROOM_DECORATION', 'Trang trí phòng', 'FaHeart', 'EXTRA_SERVICE', TRUE);
 
 /* =========================
    PRICE UNITS
    ========================= */
 CREATE TABLE price_units (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    code VARCHAR(50) UNIQUE NOT NULL,     -- PER_PERSON, PER_DAY, PER_NIGHT...
-    name VARCHAR(100) NOT NULL,           -- Theo người, Theo ngày...
-    description VARCHAR(255)
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `code` VARCHAR(50) UNIQUE NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
+    `description` VARCHAR(255)
 );
 
-INSERT INTO price_units (code, name, description) VALUES
+INSERT INTO price_units (`code`, `name`, `description`) VALUES
 ('PER_PERSON', 'Theo người', 'Tính theo mỗi người'),
 ('PER_DAY', 'Theo ngày', 'Tính theo số ngày'),
 ('PER_NIGHT', 'Theo đêm', 'Tính theo số đêm'),
@@ -2122,25 +2250,25 @@ INSERT INTO price_units (code, name, description) VALUES
    HOTEL EXTRA SERVICES
    ========================= */
 CREATE TABLE hotel_extra_services (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    hotel_id BIGINT NOT NULL,
-    amenity_id BIGINT NOT NULL,
-    base_price DECIMAL(12,2) NOT NULL,
-    unit_id BIGINT NOT NULL,     -- FK sang price_units
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `hotel_id` BIGINT NOT NULL,
+    `amenity_id` BIGINT NOT NULL,
+    `base_price` DECIMAL(12,2) NOT NULL,
+    `unit_id` BIGINT NOT NULL,
 
     CONSTRAINT fk_hes_hotel
-        FOREIGN KEY (hotel_id) REFERENCES hotels(id),
+        FOREIGN KEY (`hotel_id`) REFERENCES hotels(`id`),
 
     CONSTRAINT fk_hes_amenity
-        FOREIGN KEY (amenity_id) REFERENCES amenities(id),
+        FOREIGN KEY (`amenity_id`) REFERENCES amenities(`id`),
 
     CONSTRAINT fk_hes_unit
-        FOREIGN KEY (unit_id) REFERENCES price_units(id),
+        FOREIGN KEY (`unit_id`) REFERENCES price_units(`id`),
 
-    UNIQUE KEY ux_hotel_amenity (hotel_id, amenity_id)
+    UNIQUE KEY ux_hotel_amenity (`hotel_id`, `amenity_id`)
 );
 
-INSERT INTO hotel_extra_services (hotel_id, amenity_id, base_price, unit_id) VALUES
+INSERT INTO hotel_extra_services (`hotel_id`, `amenity_id`, `base_price`, `unit_id`) VALUES
 /* ================= HOTEL 1 (3★) ================= */
 (1,26,120000,1),
 (1,27,450000,4),
@@ -2251,16 +2379,16 @@ INSERT INTO hotel_extra_services (hotel_id, amenity_id, base_price, unit_id) VAL
    ROOM TYPE AMENITIES
    ========================= */
 CREATE TABLE room_type_amenities (
-    room_type_id BIGINT NOT NULL,
-    amenity_id BIGINT NOT NULL,
-    PRIMARY KEY (room_type_id, amenity_id),
+    `room_type_id` BIGINT NOT NULL,
+    `amenity_id` BIGINT NOT NULL,
+    PRIMARY KEY (`room_type_id`, `amenity_id`),
     CONSTRAINT fk_rta_room_type
-        FOREIGN KEY (room_type_id) REFERENCES room_types(id),
+        FOREIGN KEY (`room_type_id`) REFERENCES room_types(`id`),
     CONSTRAINT fk_rta_amenity
-        FOREIGN KEY (amenity_id) REFERENCES amenities(id)
+        FOREIGN KEY (`amenity_id`) REFERENCES amenities(`id`)
 );
 
-INSERT INTO room_type_amenities (room_type_id, amenity_id) VALUES
+INSERT INTO room_type_amenities (`room_type_id`, `amenity_id`) VALUES
 /* ================= (STANDARD) ================= */
 /* 1,5,7,9,23,28 */
 (1,2),(1,4),(1,5),(1,11),(1,13),(1,15),
@@ -2314,14 +2442,14 @@ INSERT INTO room_type_amenities (room_type_id, amenity_id) VALUES
    HOTEL_AMENITIES
    ========================= */
 CREATE TABLE hotel_amenities (
-    hotel_id BIGINT NOT NULL,
-    amenity_id BIGINT NOT NULL,
-    PRIMARY KEY (hotel_id, amenity_id),
-    FOREIGN KEY (hotel_id) REFERENCES hotels(id),
-    FOREIGN KEY (amenity_id) REFERENCES amenities(id)
+    `hotel_id` BIGINT NOT NULL,
+    `amenity_id` BIGINT NOT NULL,
+    PRIMARY KEY (`hotel_id`, `amenity_id`),
+    FOREIGN KEY (`hotel_id`) REFERENCES hotels(`id`),
+    FOREIGN KEY (`amenity_id`) REFERENCES amenities(`id`)
 );
 
-INSERT INTO hotel_amenities (hotel_id, amenity_id) VALUES
+INSERT INTO hotel_amenities (`hotel_id`, `amenity_id`) VALUES
 /* ================= HOTEL 1 (3★) ================= */
 (1,16),(1,17),(1,21),(1,22),(1,23),
 
@@ -2356,80 +2484,177 @@ INSERT INTO hotel_amenities (hotel_id, amenity_id) VALUES
    BOOKINGS
    ========================= */
 CREATE TABLE bookings (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    booking_code VARCHAR(50) UNIQUE NOT NULL,
-    user_id BIGINT NOT NULL,
-    hotel_id BIGINT NOT NULL,
-    check_in_date DATE NOT NULL,
-    check_out_date DATE NOT NULL,
-    total_price DECIMAL(12,2),
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `booking_code` VARCHAR(50) UNIQUE NOT NULL,
+    `user_id` BIGINT NOT NULL,
+    `hotel_id` BIGINT NOT NULL,
+    `check_in_date` DATE NOT NULL,
+    `check_out_date` DATE NOT NULL,
+    `total_price` DECIMAL(12,2) NOT NULL,
 	status ENUM(
 			'PENDING',
 			'CONFIRMED',
 			'CANCELLED',
 			'CHECKED_IN',
 			'CHECKED_OUT'
-		) DEFAULT 'PENDING',
-    expired_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		) DEFAULT 'PENDING' NOT NULL,
+    `expired_at` TIMESTAMP,
+    `paid_at` TIMESTAMP,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_booking_user
-        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (`user_id`) REFERENCES users(`id`),
     CONSTRAINT fk_booking_hotel
-        FOREIGN KEY (hotel_id) REFERENCES hotels(id)
+        FOREIGN KEY (`hotel_id`) REFERENCES hotels(`id`)
 );
+
+INSERT INTO bookings
+    (`booking_code`, `user_id`, `hotel_id`, `check_in_date`, `check_out_date`, `total_price`, `status`, `expired_at`, `paid_at`, `created_at`)
+VALUES
+    (
+        'BK-2026-00101', 1, 1,
+        DATE_SUB(CURDATE(), INTERVAL 3 DAY),
+        DATE_ADD(CURDATE(), INTERVAL 3 DAY),
+        4200000.00, 'CHECKED_IN',
+        NULL,
+        DATE_ADD(DATE_SUB(NOW(), INTERVAL 7 DAY), INTERVAL 23 MINUTE),
+        DATE_SUB(NOW(), INTERVAL 7 DAY)
+    ),
+    (
+        'BK-2026-00102', 2, 1,
+        DATE_SUB(CURDATE(), INTERVAL 1 DAY),
+        DATE_ADD(CURDATE(), INTERVAL 2 DAY),
+        3150000.00, 'CHECKED_IN',
+        NULL,
+        DATE_ADD(DATE_SUB(NOW(), INTERVAL 5 DAY), INTERVAL 41 MINUTE),
+        DATE_SUB(NOW(), INTERVAL 5 DAY)
+    ),
+    (
+        'BK-2026-00103', 3, 2,
+        DATE_SUB(CURDATE(), INTERVAL 2 DAY),
+        DATE_ADD(CURDATE(), INTERVAL 5 DAY),
+        7700000.00, 'CHECKED_IN',
+        NULL,
+        DATE_ADD(DATE_SUB(NOW(), INTERVAL 6 DAY), INTERVAL 17 MINUTE),
+        DATE_SUB(NOW(), INTERVAL 6 DAY)
+    ),
+    (
+        'BK-2026-00104', 4, 2,
+        DATE_SUB(CURDATE(), INTERVAL 1 DAY),
+        DATE_ADD(CURDATE(), INTERVAL 4 DAY),
+        5200000.00, 'CHECKED_IN',
+        NULL,
+        DATE_ADD(DATE_SUB(NOW(), INTERVAL 4 DAY), INTERVAL 52 MINUTE),
+        DATE_SUB(NOW(), INTERVAL 4 DAY)
+    ),
+    (
+        'BK-2026-00105', 5, 1,
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY),
+        DATE_ADD(CURDATE(), INTERVAL 1 DAY),
+        6300000.00, 'CHECKED_IN',
+        NULL,
+        DATE_ADD(DATE_SUB(NOW(), INTERVAL 10 DAY), INTERVAL 8 MINUTE),
+        DATE_SUB(NOW(), INTERVAL 10 DAY)
+    );
 
 /* =========================
    BOOKING ROOMS
    ========================= */
 CREATE TABLE booking_rooms (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    booking_id BIGINT NOT NULL,
-    room_id BIGINT NOT NULL,
-    price_per_night DECIMAL(12,2) NOT NULL,
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `booking_id` BIGINT NOT NULL,
+    `room_id` BIGINT NOT NULL,
+    `price_per_night` DECIMAL(12,2) NOT NULL,
     CONSTRAINT fk_br_booking
-        FOREIGN KEY (booking_id) REFERENCES bookings(id),
+        FOREIGN KEY (`booking_id`) REFERENCES bookings(`id`),
     CONSTRAINT fk_br_room
-        FOREIGN KEY (room_id) REFERENCES rooms(id)
+        FOREIGN KEY (`room_id`) REFERENCES rooms(`id`)
 );
+
+INSERT INTO booking_rooms (`booking_id`, `room_id`, `price_per_night`) VALUES
+-- BK-2026-00101 (hotel 1): 2 phòng
+(1,  3,  350000.00),
+(1,  7,  350000.00),
+-- BK-2026-00102 (hotel 1): 1 phòng
+(2, 12,  450000.00),
+-- BK-2026-00103 (hotel 2): 2 phòng
+(3, 35,  500000.00),
+(3, 41,  600000.00),
+-- BK-2026-00104 (hotel 2): 2 phòng
+(4, 44,  600000.00),
+(4, 50,  700000.00),
+-- BK-2026-00105 (hotel 1): 3 phòng
+(5,  2,  250000.00),
+(5, 15,  400000.00),
+(5, 22,  300000.00);
 
 /* =========================
    BOOKING ROOM SERVICES
    ========================= */
 CREATE TABLE booking_room_services (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    booking_room_id BIGINT NOT NULL,
-    amenity_id BIGINT NOT NULL,
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `booking_room_id` BIGINT NOT NULL,
+    `amenity_id` BIGINT NOT NULL,
 
-    unit_id BIGINT NOT NULL,          -- snapshot unit
-    unit_price DECIMAL(12,2) NOT NULL, -- snapshot giá tại thời điểm đặt
-    quantity INT NOT NULL DEFAULT 1,
+    `unit_id` BIGINT NOT NULL,
+    `unit_price` DECIMAL(12,2) NOT NULL,
+    `quantity` INT DEFAULT 1 NOT NULL,
 
-    total_price DECIMAL(12,2) NOT NULL,
+    `total_price` DECIMAL(12,2) NOT NULL,
 
     CONSTRAINT fk_brs_booking_room
-        FOREIGN KEY (booking_room_id) REFERENCES booking_rooms(id),
+        FOREIGN KEY (`booking_room_id`) REFERENCES booking_rooms(`id`),
 
     CONSTRAINT fk_brs_amenity
-        FOREIGN KEY (amenity_id) REFERENCES amenities(id),
+        FOREIGN KEY (`amenity_id`) REFERENCES amenities(`id`),
 
     CONSTRAINT fk_brs_unit
-        FOREIGN KEY (unit_id) REFERENCES price_units(id)
+        FOREIGN KEY (`unit_id`) REFERENCES price_units(`id`)
 );
+
+INSERT INTO booking_room_services (`booking_room_id`, `amenity_id`, `unit_id`, `unit_price`, `quantity`, `total_price`) VALUES
+-- booking_room_id 1 → room 3 / BK-00101
+(1,  26, 2,  50000.00, 6,  300000.00),
+(1,  28, 4,  80000.00, 2,  160000.00),
+-- booking_room_id 2 → room 7 / BK-00101
+(2,  27, 3,  60000.00, 6,  360000.00),
+-- booking_room_id 3 → room 12 / BK-00102
+(3,  30, 1, 100000.00, 2,  200000.00),
+(3,  33, 4,  50000.00, 3,  150000.00),
+-- booking_room_id 4 → room 35 / BK-00103
+(4,  26, 2,  50000.00, 7,  350000.00),
+(4,  29, 5, 150000.00, 1,  150000.00),
+-- booking_room_id 5 → room 41 / BK-00103
+(5,  31, 1, 120000.00, 2,  240000.00),
+(5,  35, 6,  90000.00, 3,  270000.00),
+-- booking_room_id 6 → room 44 / BK-00104
+(6,  27, 3,  60000.00, 4,  240000.00),
+(6,  32, 4,  70000.00, 2,  140000.00),
+-- booking_room_id 7 → room 50 / BK-00104
+(7,  26, 2,  50000.00, 4,  200000.00),
+(7,  34, 1, 100000.00, 3,  300000.00),
+-- booking_room_id 8 → room 2 / BK-00105
+(8,  28, 4,  80000.00, 1,   80000.00),
+-- booking_room_id 9 → room 15 / BK-00105
+(9,  30, 1, 100000.00, 2,  200000.00),
+(9,  26, 2,  50000.00, 8,  400000.00),
+-- booking_room_id 10 → room 22 / BK-00105
+(10, 33, 4,  50000.00, 4,  200000.00),
+(10, 35, 6,  90000.00, 2,  180000.00);
 
 /* =========================
    PROMOTIONS
    ========================= */
 CREATE TABLE promotions (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    `name` VARCHAR(255),
-    discount_type ENUM('PERCENT', 'FIXED'),
-    discount_value DECIMAL(10,2),
-    start_date DATE,
-    end_date DATE,
-    is_active BOOLEAN DEFAULT TRUE
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `discount_type` ENUM('PERCENT', 'FIXED') NOT NULL,
+    `discount_value` DECIMAL(10,2) NOT NULL,
+    `start_date` DATE NOT NULL,
+    `end_date` DATE NOT NULL,
+    `is_active` BOOLEAN DEFAULT TRUE NOT NULL
 );
 
-INSERT INTO promotions (name, discount_type, discount_value, start_date, end_date, is_active) VALUES
+INSERT INTO promotions (`name`, `discount_type`, `discount_value`, `start_date`, `end_date`, `is_active`) VALUES
 ('Ưu đãi Tết Dương Lịch 2026', 'PERCENT', 15.00, '2026-01-01', '2026-01-15', TRUE),
 
 ('Khuyến mãi Tết Nguyên Đán 2026', 'PERCENT', 20.00, '2026-02-01', '2026-02-20', TRUE),
@@ -2468,20 +2693,20 @@ INSERT INTO promotions (name, discount_type, discount_value, start_date, end_dat
    ROOM TYPE PROMOTIONS
    ========================= */
 CREATE TABLE room_type_promotions (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    room_type_id BIGINT NOT NULL,
-    promotion_id BIGINT NOT NULL,
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `room_type_id` BIGINT NOT NULL,
+    `promotion_id` BIGINT NOT NULL,
 
     CONSTRAINT fk_rtp_room_type
-        FOREIGN KEY (room_type_id) REFERENCES room_types(id),
+        FOREIGN KEY (`room_type_id`) REFERENCES room_types(`id`),
 
     CONSTRAINT fk_rtp_promotion
-        FOREIGN KEY (promotion_id) REFERENCES promotions(id),
+        FOREIGN KEY (`promotion_id`) REFERENCES promotions(`id`),
 
-    UNIQUE (room_type_id, promotion_id)
+    UNIQUE (`room_type_id`, `promotion_id`)
 );
 
-INSERT INTO room_type_promotions (room_type_id, promotion_id) VALUES
+INSERT INTO room_type_promotions (`room_type_id`, `promotion_id`) VALUES
 /* ===== TẾT DƯƠNG LỊCH (1) – ALL ===== */
 (1,1),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1),
 (9,1),(10,1),(11,1),(12,1),(13,1),(14,1),(15,1),(16,1),
@@ -2558,20 +2783,20 @@ INSERT INTO room_type_promotions (room_type_id, promotion_id) VALUES
    AMENITY PROMOTIONS
    ========================= */
 CREATE TABLE amenity_promotions (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    amenity_id BIGINT NOT NULL,
-    promotion_id BIGINT NOT NULL,
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `amenity_id` BIGINT NOT NULL,
+    `promotion_id` BIGINT NOT NULL,
 
     CONSTRAINT fk_ap_amenity
-        FOREIGN KEY (amenity_id) REFERENCES amenities(id),
+        FOREIGN KEY (`amenity_id`) REFERENCES amenities(`id`),
 
     CONSTRAINT fk_ap_promotion
-        FOREIGN KEY (promotion_id) REFERENCES promotions(id),
+        FOREIGN KEY (`promotion_id`) REFERENCES promotions(`id`),
 
-    UNIQUE (amenity_id, promotion_id)
+    UNIQUE (`amenity_id`, `promotion_id`)
 );
 
-INSERT INTO amenity_promotions (amenity_id, promotion_id) VALUES
+INSERT INTO amenity_promotions (`amenity_id`, `promotion_id`) VALUES
 /* ===== TẾT DƯƠNG LỊCH ===== */
 (26, 1),
 (27, 1),
@@ -2660,23 +2885,213 @@ INSERT INTO amenity_promotions (amenity_id, promotion_id) VALUES
    REVIEWS
    ========================= */
 CREATE TABLE reviews (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    hotel_id BIGINT NOT NULL,
-    user_id BIGINT NOT NULL,
-    rating INT NOT NULL,
-	image_url VARCHAR(500),
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `hotel_id` BIGINT NOT NULL,
+    `user_id` BIGINT NOT NULL,
+    `rating` INT NOT NULL,
+	`image_url` VARCHAR(500),
     `comment` TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_review_hotel
-        FOREIGN KEY (hotel_id) REFERENCES hotels(id),
+        FOREIGN KEY (`hotel_id`) REFERENCES hotels(`id`),
     CONSTRAINT fk_review_user
-        FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT unique_review UNIQUE (hotel_id, user_id)
+        FOREIGN KEY (`user_id`) REFERENCES users(`id`),
+    CONSTRAINT unique_review UNIQUE (`hotel_id`, `user_id`)
 );
+ 
+INSERT INTO reviews (`hotel_id`, `user_id`, `rating`, `image_url`, `comment`) VALUES
+-- Ha Noi Le Grand Hotel (id=1, review_rating=8.5, avg should be ~8.5)
+(1, 1, 9, NULL, 'Khách sạn rất tốt, vị trí thuận tiện gần phố cổ. Nhân viên thân thiện và nhiệt tình.'),
+(1, 2, 8, NULL, 'Phòng sạch sẽ, giá cả hợp lý. Phù hợp cho du khách bụi.'),
+(1, 3, 9, NULL, 'Rất hài lòng với dịch vụ tại đây. Wifi mạnh, phòng thoáng mát.'),
+(1, 4, 8, NULL, 'Vị trí đẹp, dễ tìm. Bữa sáng ngon. Sẽ quay lại lần sau.'),
+(1, 5, 9, NULL, 'Khách sạn nhỏ nhưng đầy đủ tiện nghi. Nhân viên lễ tân hỗ trợ tốt.'),
+(1, 6, 8, NULL, 'Giá phòng hợp lý, phòng khá rộng rãi. View nhìn ra phố đẹp.'),
+(1, 7, 8, NULL, 'Trải nghiệm tốt, vệ sinh sạch sẽ. Quầy lễ tân 24h rất tiện.'),
+(1, 8, 9, NULL, 'Đáng giá tiền. Khu vực yên tĩnh, thuận tiện đi lại.'),
+(1, 9, 8, NULL, 'Phòng đẹp, nội thất hiện đại. Nhân viên chu đáo.'),
+(1, 10, 9, NULL, 'Rất thích khách sạn này. Sẽ giới thiệu cho bạn bè.'),
+(1, 11, 8, NULL, 'Tổng thể ổn, chỉ có điều âm thanh cách âm chưa tốt lắm.'),
+(1, 12, 9, NULL, 'Vị trí đắc địa, gần nhiều quán ăn ngon. Rất tiện lợi.'),
+(1, 13, 8, NULL, 'Phòng sạch, giường ngủ thoải mái. WiFi nhanh.'),
+(1, 14, 9, NULL, 'Nhân viên thân thiện, check-in nhanh chóng. Rất hài lòng.'),
+(1, 15, 8, NULL, 'Khách sạn tốt trong tầm giá. Sẽ quay lại khi đến Hà Nội.'),
+
+-- ZAZZ Urban Ho Chi Minh Hotel (id=2, review_rating=8.7, avg should be ~8.7)
+(2, 16, 9, NULL, 'Khách sạn hiện đại, phòng rộng rãi. Hồ bơi đẹp và sạch sẽ.'),
+(2, 17, 9, NULL, 'Vị trí tốt, gần trung tâm mua sắm. Nhân viên chuyên nghiệp.'),
+(2, 18, 8, NULL, 'Bữa sáng đa dạng, phòng tập gym đầy đủ thiết bị.'),
+(2, 19, 9, NULL, 'Rất hài lòng với chất lượng phòng. Không gian sang trọng.'),
+(2, 20, 9, NULL, 'Dịch vụ tuyệt vời! Nhân viên nhiệt tình và chu đáo.'),
+(2, 21, 8, NULL, 'Phòng sạch, view đẹp. Giá hơi cao nhưng xứng đáng.'),
+(2, 22, 9, NULL, 'Thiết kế khách sạn rất đẹp mắt. Tiện nghi đầy đủ.'),
+(2, 23, 9, NULL, 'Lần đầu ở đây và rất ấn tượng. Sẽ quay lại chắc chắn.'),
+(2, 24, 8, NULL, 'Phòng cách âm tốt, yên tĩnh. Nhà hàng có món ăn ngon.'),
+(2, 25, 9, NULL, 'Khách sạn 4 sao chất lượng. Đáng để trải nghiệm.'),
+(2, 26, 9, NULL, 'Hồ bơi trên tầng thượng có view tuyệt đẹp!'),
+(2, 27, 8, NULL, 'Phục vụ tốt, lễ tân 24/7 rất tiện lợi.'),
+(2, 28, 9, NULL, 'Kỳ nghỉ tuyệt vời tại đây. Mọi thứ đều hoàn hảo.'),
+(2, 29, 9, NULL, 'Phòng hiện đại, giường êm ái. Thích nhất là hồ bơi.'),
+(2, 30, 8, NULL, 'Nhìn chung rất tốt. Sẽ quay lại lần sau.'),
+
+-- Nature Hotel (id=3, review_rating=8.7, avg should be ~8.7)
+(3, 31, 9, NULL, 'Khách sạn ở Đà Lạt tuyệt vời! Không khí trong lành, phòng ấm áp.'),
+(3, 32, 9, NULL, 'Spa rất tốt, nhân viên massage chuyên nghiệp. Thư giãn tuyệt đối.'),
+(3, 33, 8, NULL, 'View từ phòng nhìn ra núi rất đẹp. Phòng sạch sẽ, thơm tho.'),
+(3, 34, 9, NULL, 'Bữa sáng ngon, đa dạng món. Phòng tập gym hiện đại.'),
+(3, 35, 9, NULL, 'Dịch vụ 5 sao trong khách sạn 4 sao. Rất hài lòng!'),
+(3, 36, 8, NULL, 'Vị trí hơi xa trung tâm nhưng yên tĩnh, thích hợp nghỉ dưỡng.'),
+(3, 37, 9, NULL, 'Nhà hàng có món ăn đặc sản Đà Lạt rất ngon.'),
+(3, 38, 9, NULL, 'Phòng rộng, nội thất gỗ ấm cúng. Rất phù hợp với thời tiết Đà Lạt.'),
+(3, 39, 8, NULL, 'WiFi nhanh, tiện nghi đầy đủ. Giá cả hợp lý.'),
+(3, 40, 9, NULL, 'Kỳ nghỉ lãng mạn tuyệt vời! Sẽ quay lại cho tuần trăng mật.'),
+(3, 41, 9, NULL, 'Nhân viên thân thiện, nhiệt tình tư vấn địa điểm tham quan.'),
+(3, 42, 8, NULL, 'Khách sạn đẹp, sạch sẽ. Bãi đỗ xe rộng rãi.'),
+(3, 43, 9, NULL, 'Spa thư giãn cực kỳ, giá massage cũng ok.'),
+(3, 44, 9, NULL, 'Tổng thể rất tốt. Đáng để ở lại nhiều đêm hơn.'),
+(3, 45, 8, NULL, 'Phòng ấm, chăn đệm êm. Ngủ rất ngon giấc.'),
+
+-- Draha Halong Hotel (id=4, review_rating=8.8, avg should be ~8.8)
+(4, 46, 9, NULL, 'Khách sạn view vịnh Hạ Long tuyệt đẹp! Phòng sang trọng.'),
+(4, 47, 9, NULL, 'Nhân viên thân thiện, hỗ trợ đặt tour du thuyền rất tốt.'),
+(4, 48, 9, NULL, 'Chấp nhận thú cưng - điểm cộng lớn! Mình đưa cún đi cùng rất vui.'),
+(4, 49, 9, NULL, 'Phòng sạch, đẹp, hiện đại. Bữa sáng buffet phong phú.'),
+(4, 50, 8, NULL, 'Vị trí gần bến tàu, rất tiện đi tour vịnh. Giá hợp lý.'),
+(4, 51, 9, NULL, 'Khách sạn mới, tiện nghi đầy đủ. Nhà hàng phục vụ hải sản tươi ngon.'),
+(4, 52, 9, NULL, 'Rất thích không gian khách sạn. Thiết kế độc đáo, ấn tượng.'),
+(4, 53, 9, NULL, 'Dịch vụ chuyên nghiệp, check-in/out nhanh chóng.'),
+(4, 54, 8, NULL, 'Phòng có ban công view biển. Ngắm hoàng hôn rất đẹp.'),
+(4, 55, 9, NULL, 'Ở đây 3 đêm như ở nhà. Nhân viên chu đáo, nhiệt tình.'),
+(4, 56, 9, NULL, 'Khách sạn pet-friendly tốt nhất từng ở! Cún mình rất thích.'),
+(4, 57, 9, NULL, 'Lễ tân 24h hỗ trợ tốt. WiFi nhanh, ổn định.'),
+(4, 58, 9, NULL, 'Gia đình mình rất hài lòng. Trẻ em thích khách sạn này.'),
+(4, 59, 8, NULL, 'Tổng thể xuất sắc. Chỉ có giá hơi cao chút.'),
+(4, 60, 9, NULL, 'Sẽ quay lại Hạ Long và chắc chắn sẽ ở đây nữa!'),
+
+-- Hotel Majestic Saigon (id=5, review_rating=8.9, avg should be ~8.9)
+(5, 61, 9, NULL, 'Khách sạn 5 sao đẳng cấp! Phòng sang trọng, dịch vụ hoàn hảo.'),
+(5, 62, 9, NULL, 'Vị trí tuyệt đẹp bên bờ sông Sài Gòn. View tuyệt vời!'),
+(5, 63, 9, NULL, 'Bữa sáng buffet đa dạng, chất lượng cao cấp. Rất ngon!'),
+(5, 64, 9, NULL, 'Spa và hồ bơi tầng thượng tuyệt vời. Thư giãn tối đa.'),
+(5, 65, 9, NULL, 'Nhân viên chuyên nghiệp, lịch sự. Dịch vụ đẳng cấp quốc tế.'),
+(5, 66, 9, NULL, 'Phòng rộng, sạch sẽ, thiết kế cổ điển sang trọng.'),
+(5, 67, 9, NULL, 'Khách sạn lịch sử của Sài Gòn. Trải nghiệm tuyệt vời!'),
+(5, 68, 9, NULL, 'Hồ bơi có view sông đẹp. Phòng gym đầy đủ thiết bị.'),
+(5, 69, 9, NULL, 'Nhà hàng M Bar rất nổi tiếng. Cocktail và món ăn đều ngon.'),
+(5, 70, 9, NULL, 'Kỷ niệm ngày cưới ở đây - hoàn hảo từng chi tiết!'),
+(5, 71, 9, NULL, 'Gần Nhà hát Thành phố, đi bộ được. Vị trí đắc địa.'),
+(5, 72, 9, NULL, 'Giường cực kỳ êm ái. Phòng tắm sang trọng.'),
+(5, 73, 8, NULL, 'Giá cao nhưng xứng đáng. Dịch vụ 5 sao thực sự.'),
+(5, 74, 9, NULL, 'Buổi tối ngắm sông từ rooftop bar rất lãng mạn.'),
+(5, 75, 9, NULL, 'Khách sạn tốt nhất đã từng ở tại Việt Nam!'),
+
+-- Melia Bavi Mountain Retreat (id=6, review_rating=8.5, avg should be ~8.5)
+(6, 76, 9, NULL, 'Resort trên núi Ba Vì tuyệt đẹp! Không khí trong lành, yên tĩnh.'),
+(6, 77, 8, NULL, 'Spa rất tốt, view núi non hùng vĩ. Thích hợp nghỉ dưỡng.'),
+(6, 78, 9, NULL, 'Villa riêng biệt, riêng tư tuyệt đối. Rất lãng mạn!'),
+(6, 79, 8, NULL, 'Bữa sáng ngon, nhà hàng có view đẹp. Hồ bơi sạch sẽ.'),
+(6, 80, 9, NULL, 'Nhân viên thân thiện, dịch vụ chu đáo. Cảm giác như ở resort nước ngoài.'),
+(6, 81, 8, NULL, 'Hơi xa Hà Nội nhưng đáng để lái xe lên. Không gian trong lành.'),
+(6, 82, 9, NULL, 'Phòng rộng, hiện đại, view núi tuyệt đẹp. Rất đáng tiền!'),
+(6, 83, 8, NULL, 'Khu vực yên tĩnh, thích hợp cho những ai muốn tách biệt với thành phố.'),
+(6, 84, 9, NULL, 'Resort nằm trong Vườn Quốc gia, không khí rất trong lành.'),
+(6, 85, 8, NULL, 'Giá hơi cao nhưng dịch vụ tốt. Spa massage rất chuyên nghiệp.'),
+(6, 86, 9, NULL, 'Tuần trăng mật hoàn hảo! Lãng mạn và riêng tư.'),
+(6, 87, 8, NULL, 'Phòng tắm có bồn tắm lớn, view ra núi. Cực kỳ thư giãn.'),
+(6, 88, 9, NULL, 'Thức ăn ngon, đa dạng. Nhân viên phục vụ tận tình.'),
+(6, 89, 8, NULL, 'Tổng thể rất tốt. Sẽ quay lại vào dịp kỷ niệm.'),
+(6, 90, 9, NULL, 'Resort 5 sao đẳng cấp giữa núi rừng. Trải nghiệm tuyệt vời!'),
+
+-- Duyen Ha Resort Cam Ranh (id=7, review_rating=8.8, avg should be ~8.8)
+(7, 91, 8, NULL, 'Resort bãi biển tuyệt đẹp! Bãi cát trắng, nước trong xanh.'),
+(7, 92, 8, NULL, 'Chấp nhận thú cưng - mình đưa cún đi cùng rất vui. Nhân viên hỗ trợ tốt.'),
+(7, 93, 9, NULL, 'Phòng view biển tuyệt đẹp. Thức dậy nhìn ra biển rất thích!'),
+(7, 94, 9, NULL, 'Spa và massage bên bờ biển. Trải nghiệm thư giãn tuyệt vời!'),
+(7, 95, 8, NULL, 'Hồ bơi vô cực nhìn ra biển rất đẹp. Bữa sáng đa dạng.'),
+(7, 96, 9, NULL, 'Nhân viên thân thiện, nhiệt tình. Dịch vụ 5 sao thực sự.'),
+(7, 97, 9, NULL, 'Bãi biển riêng sạch đẹp. Ghế nằm và dù đầy đủ.'),
+(7, 98, 9, NULL, 'Kỳ nghỉ gia đình tuyệt vời. Trẻ em rất thích bãi biển.'),
+(7, 99, 8, NULL, 'Phòng rộng, sạch, hiện đại. Ban công có võng để nằm chill.'),
+(7, 100, 9, NULL, 'Nhà hàng hải sản tươi ngon. Giá cả hợp lý.'),
+(7, 101, 9, NULL, 'Không gian yên tĩnh, thích hợp nghỉ dưỡng. Rất thư giãn.'),
+(7, 102, 9, NULL, 'Resort pet-friendly tuyệt nhất! Có khu vực riêng cho thú cưng.'),
+(7, 103, 9, NULL, 'Hoạt động water sports đa dạng. Kayak, snorkeling rất vui.'),
+(7, 104, 8, NULL, 'Tổng thể xuất sắc. Sẽ quay lại cho kỳ nghỉ hè năm sau.'),
+(7, 105, 9, NULL, 'Resort đẹp nhất Cam Ranh từng ở. Đáng đồng tiền bát gạo!'),
+
+-- Sandy Beach Non Nuoc Resort (id=8, review_rating=8.2, avg should be ~8.2)
+(8, 106, 8, NULL, 'Resort gần bãi biển Mỹ Khê. Vị trí tốt, phòng sạch sẽ.'),
+(8, 107, 8, NULL, 'Hồ bơi đẹp, nhân viên thân thiện. Giá cả hợp lý.'),
+(8, 108, 9, NULL, 'Bữa sáng ngon, đa dạng. Gần nhiều nhà hàng hải sản.'),
+(8, 109, 8, NULL, 'Phòng thoáng mát, view biển đẹp. Spa thư giãn tốt.'),
+(8, 110, 8, NULL, 'Khu vực yên tĩnh, bãi biển đẹp. Thích hợp gia đình.'),
+(8, 111, 8, NULL, 'Dịch vụ tốt, lễ tân 24h hỗ trợ nhiệt tình.'),
+(8, 112, 8, NULL, 'Gần Ngũ Hành Sơn, dễ tham quan. WiFi ổn định.'),
+(8, 113, 9, NULL, 'Trẻ em thích hồ bơi. Phòng gia đình rộng rãi.'),
+(8, 114, 8, NULL, 'Bãi biển sạch, ít người. Thư giãn tuyệt đối.'),
+(8, 115, 8, NULL, 'Nhà hàng có món ăn ngon. Phục vụ nhanh chóng.'),
+(8, 116, 8, NULL, 'Phòng tập gym đầy đủ. Tiện nghi ok.'),
+(8, 117, 8, NULL, 'Giá phòng hợp lý cho resort 4 sao. Đáng để thử.'),
+(8, 118, 9, NULL, 'Kỳ nghỉ vui vẻ bên gia đình. Sẽ quay lại.'),
+(8, 119, 8, NULL, 'Tổng thể tốt. Có vài điểm cần cải thiện nhỏ.'),
+(8, 120, 8, NULL, 'Resort yên tĩnh, bãi biển đẹp. Thích hợp nghỉ ngơi.'),
+
+-- Harmony Homestay (id=9, review_rating=NULL, give average rating ~8.0)
+(9, 121, 8, NULL, 'Homestay nhỏ xinh giữa phố cổ. Chủ nhà thân thiện, nhiệt tình.'),
+(9, 122, 8, NULL, 'Vị trí đắc địa, đi bộ được khắp phố cổ. Giá rẻ, sạch sẽ.'),
+(9, 123, 8, NULL, 'Phòng nhỏ nhưng đầy đủ tiện nghi. Phù hợp du khách bụi.'),
+(9, 124, 8, NULL, 'Chủ nhà tư vấn địa điểm ăn uống, tham quan rất tốt.'),
+(9, 125, 8, NULL, 'Cảm giác như ở nhà. Không gian ấm cúng, gần gũi.'),
+(9, 126, 8, NULL, 'Homestay sạch sẽ, thoáng mát. Giá cả phải chăng.'),
+(9, 127, 8, NULL, 'Vị trí tốt nhất phố cổ. Đi đâu cũng gần.'),
+(9, 128, 8, NULL, 'WiFi nhanh, điều hòa mát. Giường ngủ thoải mái.'),
+(9, 129, 8, NULL, 'Homestay nhỏ xinh, giá rẻ. Thích hợp sinh viên, backpacker.'),
+(9, 130, 8, NULL, 'Chủ nhà niềm nở, quan tâm khách. Cảm ơn nhiều!'),
+(9, 131, 8, NULL, 'Ở đây 5 đêm rất vui. Như một gia đình nhỏ.'),
+(9, 132, 8, NULL, 'Vị trí tuyệt vời, giá tốt. Sẽ giới thiệu bạn bè.'),
+(9, 133, 8, NULL, 'Homestay sạch, thoáng. Khu vực yên tĩnh trong phố cổ.'),
+(9, 134, 8, NULL, 'Trải nghiệm homestay tuyệt vời ở Hà Nội!'),
+(9, 135, 8, NULL, 'Giá rẻ, chất lượng tốt. Đáng để ở lâu dài.'),
+
+-- Romantique Hotel De Hanoi (id=10, review_rating=8.7, avg should be ~8.7)
+(10, 136, 9, NULL, 'Khách sạn boutique đẹp giữa phố cổ. Thiết kế kiến trúc ấn tượng!'),
+(10, 137, 9, NULL, 'Phòng lãng mạn, trang trí tinh tế. Hoàn hảo cho cặp đôi.'),
+(10, 138, 8, NULL, 'Vị trí trung tâm phố cổ. Đi bộ được khắp nơi.'),
+(10, 139, 9, NULL, 'Nhân viên thân thiện, nhiệt tình. Dịch vụ chu đáo.'),
+(10, 140, 9, NULL, 'Bữa sáng ngon, đa dạng. Nhà hàng có view đẹp.'),
+(10, 141, 8, NULL, 'Phòng sạch, thoáng, thiết kế độc đáo. Rất thích!'),
+(10, 142, 9, NULL, 'Khách sạn boutique đẹp nhất phố cổ. Sang trọng mà ấm cúng.'),
+(10, 143, 9, NULL, 'Lễ tân hỗ trợ đặt tour, xe rất tốt. Tiện lợi!'),
+(10, 144, 8, NULL, 'WiFi nhanh, phòng tắm hiện đại. Tiện nghi đầy đủ.'),
+(10, 145, 9, NULL, 'Kỷ niệm ngày cưới ở đây rất đáng nhớ. Lãng mạn!'),
+(10, 146, 9, NULL, 'Thiết kế nội thất cổ điển pha hiện đại rất đẹp mắt.'),
+(10, 147, 8, NULL, 'Nhà hàng rooftop view phố cổ tuyệt đẹp!'),
+(10, 148, 9, NULL, 'Dịch vụ 4 sao thực sự. Nhân viên chuyên nghiệp.'),
+(10, 149, 9, NULL, 'Phòng cách âm tốt dù ở giữa phố cổ. Ngủ rất ngon.'),
+(10, 150, 8, NULL, 'Tổng thể xuất sắc. Sẽ ở lại khi quay lại Hà Nội.');
 
 /* =========================
    INDEXES (search optimization)
    ========================= */
 CREATE INDEX idx_hotel_city ON hotels(city);
 CREATE INDEX idx_booking_date ON bookings(check_in_date, check_out_date);
+
+-- Không trùng room number trong cùng hotel
+ALTER TABLE rooms
+  ADD CONSTRAINT uq_hotel_room_number UNIQUE (hotel_id, room_number);
+
+-- Không trùng amenity trong cùng hotel (cả free lẫn paid)
+ALTER TABLE hotel_amenities
+  ADD CONSTRAINT uq_hotel_amenity UNIQUE (hotel_id, amenity_id);
+
+ALTER TABLE hotel_extra_services
+  ADD CONSTRAINT uq_hotel_extra_service UNIQUE (hotel_id, amenity_id);
+
+-- 1 hotel chỉ có 1 manager
+ALTER TABLE hotels
+  ADD CONSTRAINT uq_hotel_manager UNIQUE (manager_id);
+
+-- Đảm bảo check_out khác check_in
+ALTER TABLE hotels
+  ADD CONSTRAINT chk_checkinout CHECK (check_out_time != check_in_time);

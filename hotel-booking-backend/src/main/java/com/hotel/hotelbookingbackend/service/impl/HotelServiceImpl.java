@@ -7,6 +7,7 @@ import com.hotel.hotelbookingbackend.service.HotelService;
 import com.hotel.hotelbookingbackend.service.ImageService;
 import com.hotel.hotelbookingbackend.specification.HotelSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,8 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.Normalizer;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -246,6 +252,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     @Transactional
     public Hotel createHotel(CreateHotelRequestDTO request) throws Exception {
+        System.out.println("Service called");
         // 1. Validate
         validateCreateRequest(request);
 
@@ -322,7 +329,7 @@ public class HotelServiceImpl implements HotelService {
         if (dto.getFeatureIds() != null && !dto.getFeatureIds().isEmpty()) {
             for (Long featureId : dto.getFeatureIds()) {
                 Amenity feature = amenityRepository.findById(featureId)
-                        .orElseThrow(() -> new RuntimeException("Feature not found: " + featureId));
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ: " + featureId));
 
                 RoomTypeAmenity rta = new RoomTypeAmenity();
                 rta.setRoomType(roomType);
@@ -339,7 +346,7 @@ public class HotelServiceImpl implements HotelService {
         for (CreateHotelRequestDTO.RoomDTO roomDTO : roomsDTO) {
             RoomType roomType = roomTypeMap.get(roomDTO.getRoomTypeTempId());
             if (roomType == null) {
-                throw new RuntimeException("Room type not found for tempId: " + roomDTO.getRoomTypeTempId());
+                throw new RuntimeException("Không tìm thấy loại phòng với tempId: " + roomDTO.getRoomTypeTempId());
             }
 
             Room room = new Room();
@@ -424,6 +431,7 @@ public class HotelServiceImpl implements HotelService {
                 .map(img -> HotelDetailDTO.ImageDTO.builder()
                         .imageId(img.getId())
                         .imageUrl(img.getImageUrl())
+                        .fullUrl(buildImageFullUrl(img, hotel))
                         .isPrimary(img.getIsPrimary())
                         .build())
                 .collect(Collectors.toList());
@@ -447,6 +455,7 @@ public class HotelServiceImpl implements HotelService {
                             .map(img -> HotelDetailDTO.ImageDTO.builder()
                                     .imageId(img.getId())
                                     .imageUrl(img.getImageUrl())
+                                    .fullUrl(buildImageFullUrl(img, hotel))
                                     .isPrimary(img.getIsPrimary())
                                     .build())
                             .collect(Collectors.toList());
@@ -506,6 +515,75 @@ public class HotelServiceImpl implements HotelService {
     // PRIVATE HELPER METHODS
     // ═══════════════════════════════════════════════════════════
 
+    @Value("${upload.path:src/main/resources/static/uploads}")
+    private String UPLOAD_DIR;
+    private String buildImageFullUrl(Image image, Hotel hotel) {
+        String filename = image.getImageUrl();  // hotel11_1
+        Long hotelId = image.getOwnerId();
+        String hotelFolder = "hotel" + hotelId;
+
+        if (image.getOwnerType() == Image.OwnerType.HOTEL) {
+            String[] possibleExtensions = {".jpg", ".jpeg", ".png", ".webp", ""};
+
+            for (String ext : possibleExtensions) {
+                Path filePath = Paths.get(UPLOAD_DIR, "hotel", hotelFolder, filename + ext);
+                if (Files.exists(filePath)) {
+                    return "/uploads/hotel/" + hotelFolder + "/" + filename + ext;
+                }
+            }
+
+            // Default fallback
+            return "/uploads/hotel/" + hotelFolder + "/" + filename + ".jpg";
+
+        } else if (image.getOwnerType() == Image.OwnerType.ROOM_TYPE) {
+            // Similar logic for room type images
+            RoomType roomType = roomTypeRepository.findById(image.getOwnerId())
+                    .orElse(null);
+
+            if (roomType != null) {
+                String roomTypeFolderName = toCamelCase(roomType.getName());
+                String[] possibleExtensions = {".jpg", ".jpeg", ".png", ".webp", ""};
+
+                for (String ext : possibleExtensions) {
+                    Path filePath = Paths.get(UPLOAD_DIR, "hotel", hotelFolder,
+                            roomTypeFolderName, filename + ext);
+                    if (Files.exists(filePath)) {
+                        return "/uploads/hotel/" + hotelFolder + "/" +
+                                roomTypeFolderName + "/" + filename + ext;
+                    }
+                }
+
+                // Default fallback
+                return "/uploads/hotel/" + hotelFolder + "/" + roomTypeFolderName +
+                        "/" + filename + ".jpg";
+            }
+        }
+
+        return null;
+    }
+
+    private String toCamelCase(String input) {
+        // Same implementation as ImageServiceImpl
+        if (input == null || input.isEmpty()) {
+            return "";
+        }
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        String withoutAccents = pattern.matcher(normalized).replaceAll("");
+        String cleaned = withoutAccents.replaceAll("[^a-zA-Z0-9\\s]", " ");
+        String[] words = cleaned.trim().split("\\s+");
+        StringBuilder camelCase = new StringBuilder();
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i].toLowerCase();
+            if (i == 0) {
+                camelCase.append(word);
+            } else {
+                camelCase.append(word.substring(0, 1).toUpperCase()).append(word.substring(1));
+            }
+        }
+        return camelCase.toString();
+    }
+
     private FormOptionsDTO.AmenityDTO mapAmenityToDTO(Amenity amenity) {
         return FormOptionsDTO.AmenityDTO.builder()
                 .id(amenity.getId())
@@ -542,7 +620,7 @@ public class HotelServiceImpl implements HotelService {
 
     private Hotel buildHotelEntity(CreateHotelRequestDTO.BasicInfoDTO basicInfo) {
         User manager = userRepository.findById(basicInfo.getManagerId())
-                .orElseThrow(() -> new RuntimeException("Manager not found: " + basicInfo.getManagerId()));
+                .orElseThrow(() -> new RuntimeException("Không thấy quản lý: " + basicInfo.getManagerId()));
 
         Hotel hotel = new Hotel();
         hotel.setName(basicInfo.getName());
@@ -557,7 +635,7 @@ public class HotelServiceImpl implements HotelService {
         hotel.setCheckInInstructions(basicInfo.getCheckInInstructions());
         hotel.setPolicyText(basicInfo.getPolicyText());
         hotel.setManager(manager);
-        hotel.setStatus(Hotel.HotelStatus.ACTIVE);
+        hotel.setStatus(Hotel.HotelStatus.PENDING_REVIEW);
         return hotel;
     }
 

@@ -86,6 +86,7 @@ public class HotelDetailDTO {
     public static class ImageDTO {
         private Long imageId;
         private String imageUrl;
+        private String fullUrl;
         private Boolean isPrimary;
     }
 
