@@ -252,7 +252,6 @@ public class HotelServiceImpl implements HotelService {
     @Override
     @Transactional
     public Hotel createHotel(CreateHotelRequestDTO request) throws Exception {
-        System.out.println("Service called");
         // 1. Validate
         validateCreateRequest(request);
 
@@ -442,7 +441,7 @@ public class HotelServiceImpl implements HotelService {
         List<RoomType> usedRoomTypes = rooms.stream()
                 .map(Room::getRoomType)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
         for (RoomType roomType : usedRoomTypes) {
             List<Image> images = imageService.getImagesByOwner(Image.OwnerType.ROOM_TYPE, roomType.getId());
@@ -469,6 +468,28 @@ public class HotelServiceImpl implements HotelService {
                 .collect(Collectors.toList());
         builder.roomTypeImages(roomTypeImageDTOs);
 
+        // 7b. Room types with features
+        List<RoomType> allRoomTypes = roomTypeRepository.findByHotelId(id);
+        List<HotelDetailDTO.RoomTypeDetailDTO> roomTypeDetailDTOs = allRoomTypes.stream()
+                .map(rt -> {
+                    List<Long> featureIds = roomTypeAmenityRepository.findByRoomTypeId(rt.getId())
+                            .stream()
+                            .map(rta -> rta.getAmenity().getId())
+                            .collect(Collectors.toList());
+                    return HotelDetailDTO.RoomTypeDetailDTO.builder()
+                            .roomTypeId(rt.getId())
+                            .name(rt.getName())
+                            .description(rt.getDescription())
+                            .maxAdults(rt.getMaxAdults())
+                            .maxChildren(rt.getMaxChildren())
+                            .basePrice(rt.getBasePrice())
+                            .areaM2(rt.getAreaM2())
+                            .featureIds(featureIds)
+                            .build();
+                })
+                .collect(Collectors.toList());
+        builder.roomTypes(roomTypeDetailDTOs);
+
         // 7. Statistics
         builder.totalRooms((long) rooms.size());
         builder.totalBookings(hotelRepository.countBookingsByHotelId(id));
@@ -491,8 +512,134 @@ public class HotelServiceImpl implements HotelService {
     @Override
     @Transactional
     public Hotel updateHotel(Long id, UpdateHotelRequestDTO request) throws Exception {
-        // TODO: Implement update logic
-        return null; // Placeholder
+        // 1. Fetch hotel
+        Hotel hotel = hotelRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Hotel not found: " + id));
+
+        // 2. Update basic info (safe fields only)
+        if (request.getBasicInfo() != null) {
+            updateBasicInfo(hotel, request.getBasicInfo());
+            hotel = hotelRepository.save(hotel);
+        }
+
+        // 3. Update amenities (full replace strategy)
+        if (request.getAmenities() != null) {
+            updateAmenities(hotel, request.getAmenities());
+        }
+
+        // 4. Update room types (safe fields: name, desc, area, maxAdults, maxChildren, features)
+        if (request.getRoomTypes() != null) {
+            for (UpdateHotelRequestDTO.RoomTypeUpdateDTO rtDTO : request.getRoomTypes()) {
+                updateRoomType(rtDTO);
+            }
+        }
+
+        // 5. Delete images
+        if (request.getDeletedImageIds() != null) {
+            for (Long imageId : request.getDeletedImageIds()) {
+                try { imageService.deleteImage(imageId); }
+                catch (Exception e) {
+                    System.err.println("Failed to delete image " + imageId + ": " + e.getMessage());
+                }
+            }
+        }
+
+        // 6. Add new hotel images
+        if (request.getNewHotelImages() != null && !request.getNewHotelImages().isEmpty()) {
+            List<ImageService.TempImageDTO> tempImages = request.getNewHotelImages().stream()
+                    .map(img -> new ImageService.TempImageDTO(
+                            img.getTempPath(), img.getIsPrimary(), Image.OwnerType.HOTEL, null))
+                    .collect(Collectors.toList());
+            imageService.moveTempImages(hotel.getId(), tempImages);
+        }
+
+        // 7. Update isPrimary for existing hotel images
+        if (request.getExistingHotelImages() != null) {
+            for (UpdateHotelRequestDTO.ExistingImageDTO imgDTO : request.getExistingHotelImages()) {
+                if (Boolean.TRUE.equals(imgDTO.getIsPrimary())) {
+                    imageService.setPrimaryImage(imgDTO.getImageId());
+                }
+            }
+        }
+
+        // 8. Delete rooms (non-booked only)
+        if (request.getDeletedRoomIds() != null) {
+            for (Long roomId : request.getDeletedRoomIds()) {
+                if (!isRoomBooked(roomId)) {
+                    roomRepository.findById(roomId).ifPresent(roomRepository::delete);
+                }
+            }
+        }
+
+        // 9. Update existing rooms (roomType, roomNumber, floor, status)
+        if (request.getExistingRooms() != null) {
+            for (UpdateHotelRequestDTO.ExistingRoomDTO roomDTO : request.getExistingRooms()) {
+                Room room = roomRepository.findById(roomDTO.getRoomId()).orElse(null);
+                if (room == null) continue;
+
+                if (!isRoomBooked(roomDTO.getRoomId())) {
+                    if (roomDTO.getRoomTypeId() != null) {
+                        RoomType rt = roomTypeRepository.findById(roomDTO.getRoomTypeId())
+                                .orElseThrow(() -> new RuntimeException("RoomType not found: " + roomDTO.getRoomTypeId()));
+                        room.setRoomType(rt);
+                    }
+                    if (roomDTO.getRoomNumber() != null) room.setRoomNumber(roomDTO.getRoomNumber());
+                    if (roomDTO.getFloor() != null)      room.setFloor(roomDTO.getFloor());
+                }
+                // status can always be updated
+                if (roomDTO.getStatus() != null) {
+                    room.setStatus(Room.RoomStatus.valueOf(roomDTO.getStatus()));
+                }
+                roomRepository.save(room);
+            }
+        }
+
+        // 10. Add new rooms
+        if (request.getNewRooms() != null) {
+            for (UpdateHotelRequestDTO.NewRoomDTO roomDTO : request.getNewRooms()) {
+                RoomType rt = roomTypeRepository.findById(roomDTO.getRoomTypeId())
+                        .orElseThrow(() -> new RuntimeException("RoomType not found: " + roomDTO.getRoomTypeId()));
+                Room room = new Room();
+                room.setHotel(hotel);
+                room.setRoomType(rt);
+                room.setRoomNumber(roomDTO.getRoomNumber());
+                room.setFloor(roomDTO.getFloorNumber() != null
+                        ? roomDTO.getFloorNumber()
+                        : Integer.parseInt(roomDTO.getRoomNumber().substring(0, roomDTO.getRoomNumber().length() - 2)));
+                room.setStatus(Room.RoomStatus.AVAILABLE);
+                roomRepository.save(room);
+            }
+        }
+
+        // 11. Room type images
+        if (request.getRoomTypeImages() != null) {
+            for (UpdateHotelRequestDTO.RoomTypeImagesDTO rtDTO : request.getRoomTypeImages()) {
+                // Delete existing images marked for deletion
+                if (rtDTO.getExistingImages() != null) {
+                    for (UpdateHotelRequestDTO.ExistingImageDTO imgDTO : rtDTO.getExistingImages()) {
+                        if (Boolean.TRUE.equals(imgDTO.getDeleted())) {
+                            try { imageService.deleteImage(imgDTO.getImageId()); }
+                            catch (Exception e) {
+                                System.err.println("Failed to delete room type image " + imgDTO.getImageId());
+                            }
+                        } else if (Boolean.TRUE.equals(imgDTO.getIsPrimary())) {
+                            imageService.setPrimaryImage(imgDTO.getImageId());
+                        }
+                    }
+                }
+                // Add new images
+                if (rtDTO.getNewImages() != null && !rtDTO.getNewImages().isEmpty()) {
+                    List<ImageService.TempImageDTO> tempImages = rtDTO.getNewImages().stream()
+                            .map(img -> new ImageService.TempImageDTO(
+                                    img.getTempPath(), img.getIsPrimary(),
+                                    Image.OwnerType.ROOM_TYPE, rtDTO.getRoomTypeId()))
+                            .collect(Collectors.toList());
+                    imageService.moveTempImages(hotel.getId(), tempImages);
+                }
+            }
+        }
+
+        return hotel;
     }
 
     @Override
@@ -515,8 +662,127 @@ public class HotelServiceImpl implements HotelService {
     // PRIVATE HELPER METHODS
     // ═══════════════════════════════════════════════════════════
 
+    private void updateRoomType(UpdateHotelRequestDTO.RoomTypeUpdateDTO dto) {
+        RoomType rt = roomTypeRepository.findById(dto.getRoomTypeId())
+                .orElseThrow(() -> new RuntimeException("RoomType not found: " + dto.getRoomTypeId()));
+
+        if (dto.getName()        != null) rt.setName(dto.getName());
+        if (dto.getDescription() != null) rt.setDescription(dto.getDescription());
+        if (dto.getAreaM2()      != null) rt.setAreaM2(dto.getAreaM2());
+        if (dto.getMaxAdults()   != null) rt.setMaxAdults(dto.getMaxAdults());
+        if (dto.getMaxChildren() != null) rt.setMaxChildren(dto.getMaxChildren());
+        // basePrice intentionally NOT updated
+
+        roomTypeRepository.save(rt);
+
+        // Update features (full replace)
+        if (dto.getFeatureIds() != null) {
+            roomTypeAmenityRepository.deleteByRoomTypeId(rt.getId());
+            for (Long featureId : dto.getFeatureIds()) {
+                Amenity feature = amenityRepository.findById(featureId)
+                        .orElseThrow(() -> new RuntimeException("Amenity not found: " + featureId));
+                RoomTypeAmenity rta = new RoomTypeAmenity();
+                rta.setRoomType(rt);
+                rta.setAmenity(feature);
+                roomTypeAmenityRepository.save(rta);
+            }
+        }
+    }
+
+    @Override
+    public FormOptionsDTO getFormOptionsForEdit(Long hotelId) {
+        FormOptionsDTO base = getFormOptions();
+
+        // Ensure the current hotel's manager appears in the dropdown
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new RuntimeException("Hotel not found: " + hotelId));
+
+        User currentManager = hotel.getManager();
+        boolean alreadyPresent = base.getManagers().stream()
+                .anyMatch(m -> m.getId().equals(currentManager.getId()));
+
+        if (!alreadyPresent) {
+            List<FormOptionsDTO.ManagerDTO> managers = new java.util.ArrayList<>(base.getManagers());
+            managers.add(0, FormOptionsDTO.ManagerDTO.builder()
+                    .id(currentManager.getId())
+                    .fullName(currentManager.getFullName())
+                    .email(currentManager.getEmail())
+                    .build());
+            // Return new FormOptionsDTO with updated managers list
+            return FormOptionsDTO.builder()
+                    .managers(managers)
+                    .freeServices(base.getFreeServices())
+                    .extraServices(base.getExtraServices())
+                    .roomFeatures(base.getRoomFeatures())
+                    .priceUnits(base.getPriceUnits())
+                    .hotelTypes(base.getHotelTypes())
+                    .hotelStatuses(base.getHotelStatuses())
+                    .build();
+        }
+        return base;
+    }
+
+    private void updateAmenities(Hotel hotel, UpdateHotelRequestDTO.AmenitiesDTO amenitiesDTO) {
+        // Delete all existing amenities
+        hotelAmenityRepository.deleteByHotelId(hotel.getId());
+        hotelExtraServiceRepository.deleteByHotelId(hotel.getId());
+
+        // Add new free amenities
+        if (amenitiesDTO.getFreeAmenityIds() != null) {
+            for (Long amenityId : amenitiesDTO.getFreeAmenityIds()) {
+                Amenity amenity = amenityRepository.findById(amenityId)
+                        .orElseThrow(() -> new RuntimeException("Amenity not found: " + amenityId));
+
+                HotelAmenity hotelAmenity = new HotelAmenity();
+                hotelAmenity.setHotel(hotel);
+                hotelAmenity.setAmenity(amenity);
+                hotelAmenityRepository.save(hotelAmenity);
+            }
+        }
+
+        // Add new paid amenities
+        if (amenitiesDTO.getPaidAmenities() != null) {
+            for (UpdateHotelRequestDTO.PaidAmenityDTO paidDTO : amenitiesDTO.getPaidAmenities()) {
+                Amenity amenity = amenityRepository.findById(paidDTO.getAmenityId())
+                        .orElseThrow(() -> new RuntimeException("Amenity not found: " + paidDTO.getAmenityId()));
+
+                PriceUnit unit = priceUnitRepository.findById(paidDTO.getUnitId())
+                        .orElseThrow(() -> new RuntimeException("Price unit not found: " + paidDTO.getUnitId()));
+
+                HotelExtraService extraService = new HotelExtraService();
+                extraService.setHotel(hotel);
+                extraService.setAmenity(amenity);
+                extraService.setBasePrice(new BigDecimal(paidDTO.getBasePrice()));
+                extraService.setPriceUnit(unit);
+                hotelExtraServiceRepository.save(extraService);
+            }
+        }
+    }
+
+    private void updateBasicInfo(Hotel hotel, UpdateHotelRequestDTO.BasicInfoDTO basicInfo) {
+        if (basicInfo.getName()                != null) hotel.setName(basicInfo.getName());
+        if (basicInfo.getDescription()         != null) hotel.setDescription(basicInfo.getDescription());
+        if (basicInfo.getAddress()             != null) hotel.setAddress(basicInfo.getAddress());
+        if (basicInfo.getCity()                != null) hotel.setCity(basicInfo.getCity());
+        if (basicInfo.getStarRating()          != null) hotel.setStarRating(basicInfo.getStarRating());
+        if (basicInfo.getCheckInTime()         != null) hotel.setCheckInTime(LocalTime.parse(basicInfo.getCheckInTime()));
+        if (basicInfo.getCheckOutTime()        != null) hotel.setCheckOutTime(LocalTime.parse(basicInfo.getCheckOutTime()));
+        if (basicInfo.getCheckInInstructions() != null) hotel.setCheckInInstructions(basicInfo.getCheckInInstructions());
+        if (basicInfo.getPolicyText()          != null) hotel.setPolicyText(basicInfo.getPolicyText());
+        if (basicInfo.getStatus()              != null) hotel.setStatus(Hotel.HotelStatus.valueOf(basicInfo.getStatus()));
+
+        // type & floor: intentionally NOT updated (not in safe-update list)
+
+        if (basicInfo.getManagerId() != null) {
+            User manager = userRepository.findById(basicInfo.getManagerId())
+                    .orElseThrow(() -> new RuntimeException("Manager not found: " + basicInfo.getManagerId()));
+            hotel.setManager(manager);
+        }
+    }
+
     @Value("${upload.path:src/main/resources/static/uploads}")
     private String UPLOAD_DIR;
+
     private String buildImageFullUrl(Image image, Hotel hotel) {
         String filename = image.getImageUrl();  // hotel11_1
         Long hotelId = image.getOwnerId();

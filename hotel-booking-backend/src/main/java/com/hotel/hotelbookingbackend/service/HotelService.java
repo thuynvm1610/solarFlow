@@ -15,4 +15,5 @@ public interface HotelService {
     HotelDetailDTO getHotelDetail(Long id);
     Hotel updateHotel(Long id, UpdateHotelRequestDTO request) throws Exception;
     void deleteHotel(Long id) throws Exception;
+    FormOptionsDTO getFormOptionsForEdit(Long hotelId);
 }

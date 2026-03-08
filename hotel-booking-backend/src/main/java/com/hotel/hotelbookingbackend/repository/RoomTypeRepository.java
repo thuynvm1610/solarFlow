@@ -14,4 +14,5 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
 
     @Query("SELECT DISTINCT rt.name FROM RoomType rt ORDER BY rt.name")
     List<String> findDistinctRoomTypeNames();
+    List<RoomType> findByHotelId(Long hotelId);
 }

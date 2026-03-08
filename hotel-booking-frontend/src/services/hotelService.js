@@ -1,22 +1,19 @@
 import api from './api';
 
 // Dùng cho form options (load khi mở Create / Edit modal)
-export const getFormOptions = () =>
-  api.get('/hotels/form-options')
-// Response: { managers, amenities, roomTypes, priceUnits, hotelTypes, hotelStatuses }
+export const getFormOptions = () => api.get('/hotels/form-options')
 
 // Create
-export const createHotel = (payload) =>
-  api.post('/hotels', payload)
+export const createHotel = (payload) => api.post('/hotels', payload)
 
 // Edit
-// Load đầy đủ data để fill vào Edit form
-export const getHotelDetail = (id) =>
-  api.get(`/hotels/${id}/detail`)
-// Response: hotel + rooms + images + amenities + roomTypes + extraServices
+export const getHotelDetail = (id) => api.get(`/hotels/${id}/detail`)
 
-export const updateHotel = (id, payload) =>
-  api.put(`/hotels/${id}`, payload)
+export const updateHotel = (id, data) => api.put(`/hotels/${id}`, data)
+
+export const deleteHotel = (id) => api.delete(`/hotels/${id}`)
+
+export const getTotalHotels = () => api.get('/hotels/count')
 
 const hotelService = {
   getAllHotels: async () => {

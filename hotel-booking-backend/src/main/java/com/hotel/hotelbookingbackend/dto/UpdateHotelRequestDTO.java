@@ -1,25 +1,34 @@
 package com.hotel.hotelbookingbackend.dto;
 
 import lombok.Data;
+import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * DTO for PUT /hotels/{id}
+ * Covers all safe-to-update fields as per requirements.
+ */
 @Data
 public class UpdateHotelRequestDTO {
+
     private BasicInfoDTO basicInfo;
     private AmenitiesDTO amenities;
 
-    // Images
-    private List<Long> deletedHotelImageIds;  // IDs ảnh cần xóa
-    private List<ImageDTO> newHotelImages;     // Ảnh mới upload
-    private Long primaryHotelImageId;          // ID ảnh đại diện (existing hoặc new)
-
     // Rooms
-    private List<Long> deletedRoomIds;         // IDs phòng cần xóa
-    private List<RoomDTO> newRooms;            // Phòng mới
-    private List<RoomUpdateDTO> updatedRooms;  // Phòng cần update loại
+    private List<ExistingRoomDTO> existingRooms;      // rooms to update (type, number, floor, status)
+    private List<NewRoomDTO> newRooms;                 // rooms to add
+    private List<Long> deletedRoomIds;                 // rooms to delete (non-booked only)
 
-    // Room type images
+    // Room types
+    private List<RoomTypeUpdateDTO> roomTypes;         // safe fields: name, desc, area, maxAdults, maxChildren
+
+    // Images
+    private List<TempImageDTO> newHotelImages;
+    private List<ExistingImageDTO> existingHotelImages; // to update isPrimary
+    private List<Long> deletedImageIds;
     private List<RoomTypeImagesDTO> roomTypeImages;
+
+    // ─── Inner DTOs ───────────────────────────────────────────────
 
     @Data
     public static class BasicInfoDTO {
@@ -27,55 +36,75 @@ public class UpdateHotelRequestDTO {
         private String description;
         private String address;
         private String city;
-        private String type;
+        private String type;          // NOT updatable per spec — kept for completeness but ignored in service
         private Integer starRating;
-        private Integer floor;
-        private String checkInTime;
-        private String checkOutTime;
+        private Integer floor;        // NOT updatable per spec — kept for completeness but ignored in service
+        private String checkInTime;   // "HH:mm"
+        private String checkOutTime;  // "HH:mm"
         private String checkInInstructions;
         private String policyText;
+        private String status;        // ACTIVE | CLOSED | MAINTENANCE | PENDING_REVIEW
         private Long managerId;
-        private String status;  // ACTIVE, INACTIVE, MAINTENANCE
     }
 
     @Data
     public static class AmenitiesDTO {
         private List<Long> freeAmenityIds;
-        private List<ExtraServiceDTO> extraServices;  // Bao gồm cả existing và new
+        private List<PaidAmenityDTO> paidAmenities;
     }
 
     @Data
-    public static class ExtraServiceDTO {
-        private Long extraServiceId;  // null nếu là new
+    public static class PaidAmenityDTO {
         private Long amenityId;
         private String basePrice;
         private Long unitId;
-        private Boolean isDeleted;    // true nếu muốn xóa
     }
 
     @Data
-    public static class RoomDTO {
-        private String roomNumber;
-        private Long roomTypeId;
-    }
-
-    @Data
-    public static class RoomUpdateDTO {
+    public static class ExistingRoomDTO {
         private Long roomId;
         private Long roomTypeId;
+        private String roomNumber;   // updatable
+        private Integer floor;       // updatable
+        private String status;       // AVAILABLE | OCCUPIED | MAINTENANCE
+    }
+
+    @Data
+    public static class NewRoomDTO {
+        private String roomNumber;
+        private Integer floorNumber;
+        private Long roomTypeId;
+    }
+
+    @Data
+    public static class RoomTypeUpdateDTO {
+        private Long roomTypeId;
+        private String name;
+        private String description;
+        private Integer areaM2;
+        private Integer maxAdults;
+        private Integer maxChildren;
+        // basePrice intentionally NOT included (not in safe-update list)
+        private List<Long> featureIds;  // room_type_amenities
+    }
+
+    @Data
+    public static class TempImageDTO {
+        private String tempPath;
+        private Boolean isPrimary;
+    }
+
+    @Data
+    public static class ExistingImageDTO {
+        private Long imageId;
+        private Boolean isPrimary;
+        private Boolean deleted;    // true → delete this image
     }
 
     @Data
     public static class RoomTypeImagesDTO {
         private Long roomTypeId;
-        private List<Long> deletedImageIds;
-        private List<ImageDTO> newImages;
-        private Long primaryImageId;
-    }
-
-    @Data
-    public static class ImageDTO {
-        private String tempPath;
-        private Boolean isPrimary;
+        private List<TempImageDTO> newImages;
+        private List<ExistingImageDTO> existingImages;
     }
 }

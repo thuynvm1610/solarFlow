@@ -1,22 +1,23 @@
 package com.hotel.hotelbookingbackend.dto;
 
 import com.hotel.hotelbookingbackend.entity.Hotel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Full detail DTO returned by GET /hotels/{id}/detail
+ * Used to pre-populate the Edit Hotel modal.
+ */
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class HotelDetailDTO {
-    // Basic info
+
+    // ── Basic Info ───────────────────────────────────────────────
     private Long id;
     private String name;
     private String description;
@@ -35,28 +36,29 @@ public class HotelDetailDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Amenities
+    // ── Amenities ────────────────────────────────────────────────
     private List<Long> freeAmenityIds;
-    private List<ExtraServiceDTO> extraServices;
+    private List<ExtraServiceDTO> extraServices;   // paid services with price/unit
 
-    // Rooms
+    // ── Rooms & Room Types ────────────────────────────────────────
     private List<RoomDetailDTO> rooms;
+    private List<RoomTypeDetailDTO> roomTypes;     // all room types for this hotel
 
-    // Images
+    // ── Images ───────────────────────────────────────────────────
     private List<ImageDTO> hotelImages;
     private List<RoomTypeImageDTO> roomTypeImages;
 
-    // Statistics
+    // ── Stats ─────────────────────────────────────────────────────
     private Long totalRooms;
     private Long totalBookings;
     private Long reviewCount;
 
+    // ── Inner DTOs ────────────────────────────────────────────────
+
     @Data
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class ExtraServiceDTO {
-        private Long extraServiceId;  // ID trong hotel_extra_services
+        private Long extraServiceId;
         private Long amenityId;
         private String amenityName;
         private String amenityCode;
@@ -67,8 +69,6 @@ public class HotelDetailDTO {
 
     @Data
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class RoomDetailDTO {
         private Long roomId;
         private String roomNumber;
@@ -81,19 +81,28 @@ public class HotelDetailDTO {
 
     @Data
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
+    public static class RoomTypeDetailDTO {
+        private Long roomTypeId;
+        private String name;
+        private String description;
+        private Integer maxAdults;
+        private Integer maxChildren;
+        private BigDecimal basePrice;
+        private Integer areaM2;
+        private List<Long> featureIds;
+    }
+
+    @Data
+    @Builder
     public static class ImageDTO {
         private Long imageId;
         private String imageUrl;
-        private String fullUrl;
+        private String fullUrl;   // resolved full path for display
         private Boolean isPrimary;
     }
 
     @Data
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class RoomTypeImageDTO {
         private Long roomTypeId;
         private String roomTypeName;

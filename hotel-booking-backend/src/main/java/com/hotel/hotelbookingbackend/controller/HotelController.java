@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/hotels")
 @RequiredArgsConstructor
@@ -58,8 +60,11 @@ public class HotelController {
      * Get form options for Create/Edit hotel
      */
     @GetMapping("/form-options")
-    public ResponseEntity<FormOptionsDTO> getFormOptions() {
-        FormOptionsDTO options = hotelService.getFormOptions();
+    public ResponseEntity<FormOptionsDTO> getFormOptions(
+            @RequestParam(required = false) Long hotelId) {
+        FormOptionsDTO options = (hotelId != null)
+                ? hotelService.getFormOptionsForEdit(hotelId)
+                : hotelService.getFormOptions();
         return ResponseEntity.ok(options);
     }
 
@@ -110,12 +115,17 @@ public class HotelController {
      * Update hotel
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateHotel(@PathVariable Long id, @RequestBody UpdateHotelRequestDTO request) {
+    public ResponseEntity<?> updateHotel(
+            @PathVariable Long id,
+            @RequestBody UpdateHotelRequestDTO request) {
         try {
-            Hotel hotel = hotelService.updateHotel(id, request);
-            return ResponseEntity.ok(hotel);
+            Hotel updated = hotelService.updateHotel(id, request);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Cập nhật khách sạn thành công",
+                    "hotelId", updated.getId()
+            ));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 
@@ -127,9 +137,9 @@ public class HotelController {
     public ResponseEntity<?> deleteHotel(@PathVariable Long id) {
         try {
             hotelService.deleteHotel(id);
-            return ResponseEntity.ok("Xóa khách sạn thành công");
+            return ResponseEntity.ok(Map.of("message", "Xóa khách sạn thành công"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 }

@@ -1,21 +1,21 @@
+// src/components/admin/hotel/steps/Step5Images.jsx
+
 import { useCreateHotel } from '../../../../contexts/CreateHotelContext'
-import { useEditHotel } from '../../../../contexts/EditHotelContext'
+import { useEditHotel }   from '../../../../contexts/EditHotelContext'
 import RoomTypeImageUploader from '../components/RoomTypeImageUploader'
+import { StepErrorBanner } from '../../../common/FieldError'
 import { uploadTempImage, validateImageFile } from '../../../../services/uploadService'
 
-export default function Step5Images({ formOptions, isEdit }) {
-  if (isEdit) return <Step5Edit />
-  return <Step5Create />
+export default function Step5Images({ isEdit, errors = {} }) {
+  if (isEdit) return <Step5Edit errors={errors} />
+  return           <Step5Create errors={errors} />
 }
 
-// ── Create ───────────────────────────────────────────────────
-function Step5Create() {
+function Step5Create({ errors }) {
   const { state, dispatch } = useCreateHotel()
 
   const handleUpload = async (e) => {
     const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
-
     for (const file of files) {
       try {
         validateImageFile(file)
@@ -25,24 +25,22 @@ function Step5Create() {
           type: 'ADD_HOTEL_IMAGE',
           payload: { tempPath: res.data.tempPath, isPrimary: false, previewUrl },
         })
-      } catch (err) {
-        alert(`Lỗi upload ${file.name}: ${err.message}`)
-      }
+      } catch (err) { alert(`Lỗi upload ${file.name}: ${err.message}`) }
     }
-    
     e.target.value = ''
   }
 
   return (
     <div className="step-content">
+      <StepErrorBanner errors={errors} />
+
       <section className="image-section">
-        <h3>Ảnh khách sạn</h3>
-        <div className="image-uploader">
+        <h3>Ảnh khách sạn <span className="text-red-500 normal-case text-xs font-normal">(bắt buộc, chọn 1 ảnh đại diện ★)</span></h3>
+        <div className={`image-uploader p-3 rounded-xl border-2 border-dashed transition-colors
+          ${errors._global ? 'border-red-300 bg-red-50' : 'border-transparent'}`}
+        >
           {state.hotelImages.map(img => (
-            <ImageCard
-              key={img.tempPath}
-              src={img.previewUrl}
-              isPrimary={img.isPrimary}
+            <ImageCard key={img.tempPath} src={img.previewUrl} isPrimary={img.isPrimary}
               onSetPrimary={() => dispatch({ type: 'SET_HOTEL_PRIMARY', payload: img.tempPath })}
               onDelete={() => dispatch({ type: 'REMOVE_HOTEL_IMAGE', payload: img.tempPath })}
             />
@@ -54,14 +52,9 @@ function Step5Create() {
       <section className="image-section">
         <h3>Ảnh theo loại phòng</h3>
         {state.customRoomTypes.length === 0
-          ? <p className="empty-hint">Chưa có loại phòng nào được chọn.</p>
+          ? <p className="empty-hint">Chưa có loại phòng nào được tạo.</p>
           : state.customRoomTypes.map(rt => (
-            <RoomTypeImageUploader 
-              key={rt.tempId} 
-              roomType={rt} 
-              isEdit={false} 
-              dispatch={dispatch} 
-            />
+            <RoomTypeImageUploader key={rt.tempId} roomType={rt} isEdit={false} dispatch={dispatch} />
           ))
         }
       </section>
@@ -69,14 +62,11 @@ function Step5Create() {
   )
 }
 
-// ── Edit ─────────────────────────────────────────────────────
-function Step5Edit() {
+function Step5Edit({ errors }) {
   const { state, dispatch } = useEditHotel()
 
   const handleUpload = async (e) => {
     const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
-
     for (const file of files) {
       try {
         validateImageFile(file)
@@ -86,35 +76,28 @@ function Step5Edit() {
           type: 'ADD_NEW_HOTEL_IMAGE',
           payload: { tempPath: res.data.tempPath, isPrimary: false, previewUrl },
         })
-      } catch (err) {
-        alert(`Lỗi upload ${file.name}: ${err.message}`)
-      }
+      } catch (err) { alert(`Lỗi upload ${file.name}: ${err.message}`) }
     }
-    
     e.target.value = ''
   }
 
   return (
     <div className="step-content">
+      <StepErrorBanner errors={errors} />
+
       <section className="image-section">
-        <h3>Ảnh khách sạn</h3>
-        <div className="image-uploader">
+        <h3>Ảnh khách sạn <span className="text-red-500 normal-case text-xs font-normal">(bắt buộc, chọn 1 ảnh đại diện ★)</span></h3>
+        <div className={`image-uploader p-3 rounded-xl border-2 border-dashed transition-colors
+          ${errors._global ? 'border-red-300 bg-red-50' : 'border-transparent'}`}
+        >
           {state.existingHotelImages.map(img => (
-            <ImageCard
-              key={img.imageId}
-              src={`/uploads/${img.path}`}
-              isPrimary={img.isPrimary}
-              badge="Đã lưu"
+            <ImageCard key={img.imageId} src={img.path} isPrimary={img.isPrimary} badge="Đã lưu"
               onSetPrimary={() => dispatch({ type: 'SET_HOTEL_PRIMARY', payload: { imageId: img.imageId } })}
               onDelete={() => dispatch({ type: 'DELETE_EXISTING_HOTEL_IMAGE', payload: img.imageId })}
             />
           ))}
           {state.newHotelImages.map(img => (
-            <ImageCard
-              key={img.tempPath}
-              src={img.previewUrl}
-              isPrimary={img.isPrimary}
-              badge="Mới"
+            <ImageCard key={img.tempPath} src={img.previewUrl} isPrimary={img.isPrimary} badge="Mới"
               onSetPrimary={() => dispatch({ type: 'SET_HOTEL_PRIMARY', payload: { tempPath: img.tempPath } })}
               onDelete={() => dispatch({ type: 'DELETE_NEW_HOTEL_IMAGE', payload: img.tempPath })}
             />
@@ -128,12 +111,7 @@ function Step5Edit() {
         {state.selectedRoomTypes.length === 0
           ? <p className="empty-hint">Chưa có loại phòng nào.</p>
           : state.selectedRoomTypes.map(rt => (
-            <RoomTypeImageUploader 
-              key={rt.roomTypeId} 
-              roomType={rt} 
-              isEdit={true} 
-              dispatch={dispatch} 
-            />
+            <RoomTypeImageUploader key={rt.roomTypeId} roomType={rt} isEdit dispatch={dispatch} />
           ))
         }
       </section>
@@ -162,13 +140,7 @@ function UploadButton({ onUpload, multiple = false }) {
   return (
     <label className="upload-btn">
       <span>+ Thêm ảnh</span>
-      <input 
-        type="file" 
-        accept="image/jpeg,image/png,image/webp" 
-        multiple={multiple}
-        hidden 
-        onChange={onUpload} 
-      />
+      <input type="file" accept="image/jpeg,image/png,image/webp" multiple={multiple} hidden onChange={onUpload} />
     </label>
   )
 }

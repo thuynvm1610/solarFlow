@@ -1,70 +1,44 @@
 // src/components/admin/hotel/CreateHotelModal.jsx
 
-import { useState, useEffect } from 'react'
-import { createPortal } from 'react-dom'
+import { useState, useEffect }         from 'react'
 import { CreateHotelProvider, useCreateHotel } from '../../../contexts/CreateHotelContext'
-import { createHotel, getFormOptions } from '../../../services/hotelService'
-import { useToast } from '../../../contexts/ToastContext'
-import Step1BasicInfo from './steps/Step1BasicInfo'
-import Step2Amenities from './steps/Step2Amenities'
-import Step3CreateRoomTypes from './steps/Step3CreateRoomTypes'
-import Step4Rooms from './steps/Step4Rooms'
-import Step5Images from './steps/Step5Images'
-import './HotelSteps.css'
+import { createHotel, getFormOptions }         from '../../../services/hotelService'
+import { useToast }            from '../../../contexts/ToastContext'
+import Step1BasicInfo          from './steps/Step1BasicInfo'
+import Step2Amenities          from './steps/Step2Amenities'
+import Step3CreateRoomTypes    from './steps/Step3CreateRoomTypes'
+import Step4Rooms              from './steps/Step4Rooms'
+import Step5Images             from './steps/Step5Images'
+import {
+  validateStep1, validateStep2, validateStep3Create,
+  validateStep4Create, validateStep5Create,
+  hasErrors, getErrorList,
+} from '../../../hooks/useStepValidation'
 
-const STEPS = [
-  'Thông tin cơ bản',
-  'Tiện ích & Dịch vụ',
-  'Loại phòng',
-  'Phòng',
-  'Hình ảnh'
-]
+const STEPS = ['Thông tin cơ bản', 'Tiện ích & Dịch vụ', 'Loại phòng', 'Phòng', 'Hình ảnh']
 
+// ── Wrapper ───────────────────────────────────────────────────
 export default function CreateHotelModal({ onClose, onSuccess }) {
   const [formOptions, setFormOptions] = useState(null)
-  const [loadingOptions, setLoadingOptions] = useState(true)
-  const [error, setError] = useState(null)
+  const [loading,     setLoading]     = useState(true)
   const toast = useToast()
 
   useEffect(() => {
     getFormOptions()
       .then(res => setFormOptions(res.data))
-      .catch(err => {
-        const errorMsg = err.response?.data?.message || err.message || 'Không thể tải dữ liệu form'
-        setError(errorMsg)
-        toast.error(errorMsg)
-      })
-      .finally(() => setLoadingOptions(false))
-  }, [toast])
+      .catch(() => toast.error('Không thể tải form options'))
+      .finally(() => setLoading(false))
+  }, [])
 
-  if (error) {
+  if (loading) {
     return (
       <ModalShell onClose={onClose}>
-        <div className="flex flex-col items-center gap-3 py-14 px-10 text-center">
-          <h3 className="text-lg font-semibold text-red-600">Lỗi</h3>
-          <p className="text-sm text-slate-600">{error}</p>
-          <button
-            onClick={onClose}
-            className="mt-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold transition-all"
-          >
-            Đóng
-          </button>
+        <div className="flex items-center justify-center py-20 text-slate-500">
+          Đang tải dữ liệu...
         </div>
       </ModalShell>
     )
   }
-
-  if (loadingOptions) {
-    return (
-      <ModalShell onClose={onClose}>
-        <div className="flex items-center justify-center py-20 text-slate-500 text-sm font-medium">
-          Đang tải...
-        </div>
-      </ModalShell>
-    )
-  }
-
-  if (!formOptions) return null
 
   return (
     <CreateHotelProvider>
@@ -73,142 +47,112 @@ export default function CreateHotelModal({ onClose, onSuccess }) {
   )
 }
 
+// ── Form ──────────────────────────────────────────────────────
 function CreateHotelForm({ formOptions, onClose, onSuccess }) {
-  const { state, dispatch, buildSubmitPayload, validatePayload } = useCreateHotel()
-  const [submitting, setSubmitting] = useState(false)
+  const { state, dispatch, buildCreatePayload } = useCreateHotel()
   const toast = useToast()
+  const [submitting, setSubmitting] = useState(false)
+
+  // stepErrors chỉ dùng cho Step 1 (inline field errors)
+  // Step 2-5 dùng toast
+  const [step1Errors, setStep1Errors] = useState({})
 
   const currentStep = state.currentStep
-  const isLastStep = currentStep === STEPS.length
+  const isLastStep  = currentStep === STEPS.length
 
   const validateCurrentStep = () => {
-    const { basicInfo, amenities } = state
-    const errors = []
-
+    const { basicInfo, amenities, customRoomTypes, generatedRooms, hotelImages } = state
     switch (currentStep) {
-      case 1:
-        if (!basicInfo.name?.trim()) errors.push('Tên khách sạn không được để trống')
-        if (!basicInfo.description?.trim()) errors.push('Mô tả không được để trống')
-        if (!basicInfo.address?.trim()) errors.push('Địa chỉ không được để trống')
-        if (!basicInfo.city?.trim()) errors.push('Thành phố không được để trống')
-        if (!basicInfo.type) errors.push('Chưa chọn loại khách sạn')
-        if (!basicInfo.starRating) errors.push('Chưa chọn số sao')
-        if (!basicInfo.floor || basicInfo.floor <= 0) errors.push('Số tầng phải lớn hơn 0')
-        if (!basicInfo.managerId) errors.push('Chưa chọn quản lý')
-        if (!basicInfo.checkInTime) errors.push('Chưa nhập giờ check-in')
-        if (!basicInfo.checkOutTime) errors.push('Chưa nhập giờ check-out')
-        if (basicInfo.checkInTime && basicInfo.checkOutTime && basicInfo.checkInTime === basicInfo.checkOutTime)
-          errors.push('Giờ check-in và giờ check-out không được trùng nhau')
-        break
-      case 2:
-        amenities.paidAmenities.forEach((pa) => {
-          if (!pa.basePrice || Number(pa.basePrice) <= 0) errors.push(`Dịch vụ "${pa.name}" chưa nhập giá`)
-          if (!pa.unitId) errors.push(`Dịch vụ "${pa.name}" chưa chọn đơn vị`)
-        })
-        break
-      case 3:
-        if (state.customRoomTypes.length === 0) errors.push('Phải tạo ít nhất 1 loại phòng')
-        state.customRoomTypes.forEach((rt, idx) => {
-          if (!rt.name?.trim()) errors.push(`Loại phòng #${idx + 1} chưa có tên`)
-          if (!rt.basePrice || Number(rt.basePrice) <= 0) errors.push(`Loại phòng "${rt.name || '#' + (idx + 1)}" chưa có giá`)
-        })
-        break
-      case 4:
-        if (state.generatedRooms.length === 0) errors.push('Chưa tạo danh sách phòng')
-        const unassigned = state.generatedRooms.filter(r => !r.roomTypeTempId)
-        if (unassigned.length > 0) errors.push(`Còn ${unassigned.length} phòng chưa được gán loại`)
-        break
-      case 5:
-        if (state.hotelImages.length === 0) errors.push('Phải có ít nhất 1 ảnh khách sạn')
-        if (!state.hotelImages.some(img => img.isPrimary)) errors.push('Chưa chọn ảnh đại diện cho khách sạn')
-        state.customRoomTypes.forEach(rt => {
-          if (rt.images.length === 0) errors.push(`Loại phòng "${rt.name}" chưa có ảnh`)
-          if (!rt.images.some(i => i.isPrimary)) errors.push(`Loại phòng "${rt.name}" chưa chọn ảnh đại diện`)
-        })
-        break
-      default:
-        break
+      case 1: return validateStep1(basicInfo, false)
+      case 2: return validateStep2(amenities)
+      case 3: return validateStep3Create(customRoomTypes)
+      case 4: return validateStep4Create(generatedRooms)
+      case 5: return validateStep5Create(hotelImages)
+      default: return {}
     }
-
-    return errors
   }
 
   const handleNext = () => {
     const errors = validateCurrentStep()
-    if (errors.length > 0) {
-      errors.forEach(error => toast.error(error, 4000))
+    if (!hasErrors(errors)) {
+      setStep1Errors({})
+      dispatch({ type: 'SET_STEP', payload: currentStep + 1 })
       return
     }
-    dispatch({ type: 'SET_STEP', payload: currentStep + 1 })
+
+    if (currentStep === 1) {
+      // Step 1: hiện inline errors dưới từng field
+      setStep1Errors(errors)
+      toast.error('Vui lòng điền đầy đủ các trường bắt buộc')
+    } else {
+      // Step 2-5: chỉ toast, không cần inline
+      getErrorList(errors).forEach(msg => toast.error(msg))
+    }
   }
 
-  const handleBack = () => dispatch({ type: 'SET_STEP', payload: currentStep - 1 })
+  const handleBack = () => {
+    setStep1Errors({})
+    dispatch({ type: 'SET_STEP', payload: currentStep - 1 })
+  }
 
   const handleSubmit = async () => {
-    const errors = validatePayload()
-    if (errors.length) {
-      errors.forEach(error => toast.error(error, 5000))
+    const errors = validateCurrentStep()
+    if (hasErrors(errors)) {
+      if (currentStep === 1) {
+        setStep1Errors(errors)
+        toast.error('Vui lòng điền đầy đủ các trường bắt buộc')
+      } else {
+        getErrorList(errors).forEach(msg => toast.error(msg))
+      }
       return
     }
 
     setSubmitting(true)
     try {
-      await createHotel(buildSubmitPayload())
-      toast.success('Tạo khách sạn thành công!', 3000)
-      dispatch({ type: 'RESET' })
+      await createHotel(buildCreatePayload())
+      toast.success('Tạo khách sạn thành công!')
       onSuccess?.()
       onClose()
     } catch (err) {
-      toast.error(err.response?.data?.message ?? 'Có lỗi xảy ra khi tạo khách sạn', 5000)
+      toast.error(err.response?.data?.message ?? 'Có lỗi xảy ra khi tạo khách sạn')
     } finally {
       setSubmitting(false)
     }
   }
 
-  const stepProps = { formOptions, isEdit: false }
-
   return (
-    <ModalShell onClose={onClose} title="Thêm mới khách sạn">
+    <ModalShell onClose={onClose} title="Tạo khách sạn mới">
       <StepIndicator steps={STEPS} currentStep={currentStep} />
 
-      <div className="flex-1 overflow-y-auto px-7 py-6 [scrollbar-width:thin]">
-        {currentStep === 1 && <Step1BasicInfo {...stepProps} />}
-        {currentStep === 2 && <Step2Amenities {...stepProps} />}
-        {currentStep === 3 && <Step3CreateRoomTypes {...stepProps} />}
-        {currentStep === 4 && <Step4Rooms {...stepProps} />}
-        {currentStep === 5 && <Step5Images {...stepProps} />}
+      <div className="flex-1 overflow-y-auto px-6 py-5">
+        {currentStep === 1 && (
+          <Step1BasicInfo formOptions={formOptions} isEdit={false} errors={step1Errors} />
+        )}
+        {currentStep === 2 && <Step2Amenities formOptions={formOptions} isEdit={false} />}
+        {currentStep === 3 && <Step3CreateRoomTypes formOptions={formOptions} />}
+        {currentStep === 4 && <Step4Rooms formOptions={formOptions} isEdit={false} />}
+        {currentStep === 5 && <Step5Images isEdit={false} />}
       </div>
 
-      <div className="flex items-center justify-end gap-3 px-7 py-4 border-t border-slate-100 bg-slate-50">
+      <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 flex-shrink-0">
         {currentStep > 1 && (
-          <button
-            onClick={handleBack}
-            disabled={submitting}
-            className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 active:scale-95 text-slate-700 text-sm font-semibold border border-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <button onClick={handleBack} disabled={submitting}
+            className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-sm transition-colors">
             Quay lại
           </button>
         )}
-        <button
-          onClick={onClose}
-          disabled={submitting}
-          className="px-5 py-2.5 rounded-xl bg-white hover:bg-red-50 active:scale-95 text-red-500 text-sm font-semibold border border-red-200 hover:border-red-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <button onClick={onClose} disabled={submitting}
+          className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-sm transition-colors">
           Hủy
         </button>
         {isLastStep ? (
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 active:scale-95 text-white text-sm font-semibold shadow-sm shadow-sky-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {submitting ? 'Đang lưu...' : 'Tạo khách sạn'}
+          <button onClick={handleSubmit} disabled={submitting}
+            className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors disabled:opacity-50">
+            {submitting ? 'Đang tạo...' : 'Tạo khách sạn'}
           </button>
         ) : (
-          <button
-            onClick={handleNext}
-            className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 active:scale-95 text-white text-sm font-semibold shadow-sm shadow-sky-200 transition-all"
-          >
+          <button onClick={handleNext}
+            className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors">
             Tiếp theo
           </button>
         )}
@@ -217,83 +161,54 @@ function CreateHotelForm({ formOptions, onClose, onSuccess }) {
   )
 }
 
-// ─────────────────────────────────────────────
-// Shared UI
-// ─────────────────────────────────────────────
-
-/**
- * FIX 1 — Modal centering:
- * Dùng createPortal để render overlay ra document.body,
- * thoát khỏi DOM của sidebar → modal luôn căn giữa viewport
- * dù sidebar mở rộng hay thu gọn.
- */
+// ── Shared UI ─────────────────────────────────────────────────
 export function ModalShell({ onClose, title, children }) {
-  return createPortal(
+  return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden mx-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         {title && (
-          <div className="flex items-center justify-between px-7 py-5 border-b border-slate-100 bg-gradient-to-r from-sky-600 to-indigo-600">
-            <h2 className="text-xl font-bold text-white tracking-wide">{title}</h2>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-all text-sm"
-            >
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 flex-shrink-0">
+            <h2 className="text-xl font-bold text-slate-800">{title}</h2>
+            <button onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors text-lg">
               ✕
             </button>
           </div>
         )}
         {children}
       </div>
-    </div>,
-    document.body
+    </div>
   )
 }
 
-/**
- * FIX 2 — Step indicator overflow:
- * - Bỏ whitespace-nowrap, dùng text-center + line clamp thay thế
- * - Giảm connector width từ w-10 (40px) xuống w-6 (24px)
- * - Dùng overflow-x-auto + scrollbar ẩn làm fallback nếu vẫn tràn
- * - Label ẩn trên màn hình nhỏ (< sm), chỉ hiện số bước
- */
 export function StepIndicator({ steps, currentStep }) {
   return (
-    <div className="flex items-center px-6 py-4 bg-slate-50 border-b border-slate-100 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {steps.map((label, i) => {
-        const num = i + 1
-        const isDone = num < currentStep
-        const isActive = num === currentStep
+    <div className="flex items-center px-6 py-4 border-b border-slate-100 flex-shrink-0 overflow-x-auto">
+      {steps.map((label, idx) => {
+        const step   = idx + 1
+        const done   = step < currentStep
+        const active = step === currentStep
         return (
-          <div key={i} className="flex items-center flex-shrink-0">
-            {/* Circle + label inline */}
+          <div key={step} className="flex items-center min-w-0">
             <div className="flex items-center gap-2 flex-shrink-0">
-              <div className={`
-                w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-300 flex-shrink-0
-                ${isActive ? 'bg-sky-600 border-sky-600 text-white shadow-md shadow-sky-200' : ''}
-                ${isDone ? 'bg-emerald-500 border-emerald-500 text-white' : ''}
-                ${!isActive && !isDone ? 'border-slate-300 text-slate-400 bg-white' : ''}
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors
+                ${done   ? 'bg-green-500 text-white' : ''}
+                ${active ? 'bg-blue-600 text-white ring-4 ring-blue-100' : ''}
+                ${!done && !active ? 'bg-slate-200 text-slate-500' : ''}
               `}>
-                {isDone ? '✓' : num}
+                {done ? '✓' : step}
               </div>
-              <span className={`
-                text-xs font-medium whitespace-nowrap transition-colors duration-300
-                ${isActive ? 'text-sky-700 font-semibold' : ''}
-                ${isDone ? 'text-emerald-600' : ''}
-                ${!isActive && !isDone ? 'text-slate-400' : ''}
+              <span className={`text-xs font-medium whitespace-nowrap
+                ${active ? 'text-blue-600' : done ? 'text-green-600' : 'text-slate-400'}
               `}>
                 {label}
               </span>
             </div>
-
-            {/* Connector */}
-            {i < steps.length - 1 && (
-              <div className={`
-                w-5 h-0.5 mx-2 rounded-full flex-shrink-0 transition-all duration-300
-                ${isDone ? 'bg-emerald-300' : 'bg-slate-200'}
-              `} />
+            {idx < steps.length - 1 && (
+              <div className={`h-px w-6 mx-2 flex-shrink-0 ${done ? 'bg-green-400' : 'bg-slate-200'}`} />
             )}
           </div>
         )

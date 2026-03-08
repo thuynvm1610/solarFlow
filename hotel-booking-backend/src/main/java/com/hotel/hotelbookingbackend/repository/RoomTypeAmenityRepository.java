@@ -12,4 +12,5 @@ import java.util.List;
 public interface RoomTypeAmenityRepository extends JpaRepository<RoomTypeAmenity, Long> {
 
     List<RoomTypeAmenity> findByRoomTypeId(Long roomTypeId);
+    void deleteByRoomTypeId(Long roomTypeId);
 }
